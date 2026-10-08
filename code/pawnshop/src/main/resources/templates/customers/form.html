@@ -14,7 +14,14 @@
                         <h4 class="mb-0" th:text="${customerId != null ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่'}">ฟอร์มข้อมูลลูกค้า</h4>
                     </div>
                     <div class="card-body">
-                        <form th:action="${customerId != null ? '/customers/' + customerId : '/customers'}"
+
+                        <!-- แจ้งเตือนข้อผิดพลาดจาก Service (เช่น เลขบัตรประชาชนซ้ำ 409) -->
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                            <span th:text="${errorMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="${customerId != null} ? @{/customers/{id}(id=${customerId})} : @{/customers}"
                               th:object="${customerRequest}"
                               method="post">
                             
