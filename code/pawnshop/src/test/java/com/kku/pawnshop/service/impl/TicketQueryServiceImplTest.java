@@ -40,32 +40,35 @@ public class TicketQueryServiceImplTest {
 
 		assertSame(ticket, result);
 	}
+
 	@Test
 	void findById_missingTicket_throwNotFound() {
 		when(ticketRepository.findById(99L)).thenReturn(Optional.empty());
-		
+
 		assertThrows(ResourceNotFoundException.class, () -> service.findById(99L));
 	}
+
 	@Test
 	void quoteRedemptionAmount_returnsAmountFromCalculator() {
 		PawnTicket ticket = new PawnTicket();
 		LocalDate today = LocalDate.of(2026, 10, 1);
 		when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
 		when(interestCalculator.redemptionAmount(ticket, today)).thenReturn(Money.of(5000));
-		
+
 		Money result = service.quoteRedemptionAmount(1L, today);
-		
+
 		assertEquals(Money.of(5000), result);
 	}
+
 	@Test
 	void quoteRenewalInterest_returnsInterestFromCalculator() {
 		PawnTicket ticket = new PawnTicket();
 		LocalDate today = LocalDate.of(2026, 10, 1);
 		when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
 		when(interestCalculator.accruedInterest(ticket, today)).thenReturn(Money.of(150));
-		
+
 		Money result = service.quoteRenewalInterest(1L, today);
-		
+
 		assertEquals(Money.of(150), result);
 	}
 }
