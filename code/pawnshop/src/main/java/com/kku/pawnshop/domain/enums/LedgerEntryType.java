@@ -4,5 +4,6 @@ package com.kku.pawnshop.domain.enums;
 public enum LedgerEntryType {
     PAWN,
     INTEREST_PAYMENT,
-    REDEMPTION
+    REDEMPTION,
+    REVERSAL
 }
