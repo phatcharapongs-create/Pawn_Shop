@@ -75,7 +75,7 @@ public class CustomerServiceImpl implements CustomerService {
         // ตรวจสอบเงื่อนไขตามข้อกำหนด: หากมีตั๋วจำนำผูกอยู่ ห้ามลบและตอบ 409 Conflict
         boolean hasActiveTickets = pawnTicketRepository.existsByCustomerId(id);
         if (hasActiveTickets) {
-            throw new DuplicateResourceException("ไม่สามารถลบข้อมูลลูกค้าได้ เนื่องจากมีประวัติตั๋วจำนำในระบบ (409 Conflict)");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ไม่สามารถลบข้อมูลลูกค้าได้ เนื่องจากมีประวัติตั๋วจำนำอยู่ในระบบ");
         }
 
         customerRepository.delete(customer);
