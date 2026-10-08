@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -42,13 +43,22 @@ public class CustomerWebController {
     public String createCustomer(
             @Valid @ModelAttribute("customerRequest") CustomerRequest request,
             BindingResult bindingResult,
+            Model model,
             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "customers/form";
         }
-        customerService.createCustomer(request);
-        redirectAttributes.addFlashAttribute("successMessage", "บันทึกข้อมูลลูกค้าสำเร็จ");
-        return "redirect:/customers";
+        try {
+            customerService.createCustomer(request);
+            redirectAttributes.addFlashAttribute("successMessage", "บันทึกข้อมูลลูกค้าสำเร็จ");
+            return "redirect:/customers";
+        } catch (ResponseStatusException e) {
+            model.addAttribute("errorMessage", e.getReason());
+            return "customers/form";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "customers/form";
+        }
     }
 
     @GetMapping("/{id}/edit")
@@ -76,9 +86,19 @@ public class CustomerWebController {
             model.addAttribute("customerId", id);
             return "customers/form";
         }
-        customerService.updateCustomer(id, request);
-        redirectAttributes.addFlashAttribute("successMessage", "แก้ไขข้อมูลลูกค้าสำเร็จ");
-        return "redirect:/customers";
+        try {
+            customerService.updateCustomer(id, request);
+            redirectAttributes.addFlashAttribute("successMessage", "แก้ไขข้อมูลลูกค้าสำเร็จ");
+            return "redirect:/customers";
+        } catch (ResponseStatusException e) {
+            model.addAttribute("customerId", id);
+            model.addAttribute("errorMessage", e.getReason());
+            return "customers/form";
+        } catch (Exception e) {
+            model.addAttribute("customerId", id);
+            model.addAttribute("errorMessage", e.getMessage());
+            return "customers/form";
+        }
     }
 
     @PostMapping("/{id}/delete")
@@ -86,6 +106,8 @@ public class CustomerWebController {
         try {
             customerService.deleteCustomer(id);
             redirectAttributes.addFlashAttribute("successMessage", "ลบข้อมูลลูกค้าสำเร็จ");
+        } catch (ResponseStatusException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getReason());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
