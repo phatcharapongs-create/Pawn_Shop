@@ -10,7 +10,10 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/appraisals")
@@ -23,7 +26,7 @@ public class AppraisalWebController {
     }
     @GetMapping("/new")
     public String newAppraisal(Model model) {
-        model.addAttribute("item", new PledgedItemRequest(null, "", null, null, null, null, null, 3, null, null, null));
+        model.addAttribute("item", new PledgedItemRequest());
         model.addAttribute("itemTypes", ItemType.values());
         return "appraisals/new";
     }
@@ -34,7 +37,7 @@ public class AppraisalWebController {
             return "appraisals/new";
         }
         PledgedItem item = mapper.toEntity(request);
-        Appraisal appraisal = appraisalService.appraise(item, request.appraiserId());
+        Appraisal appraisal = appraisalService.appraise(item, request.getAppraiserId());
         model.addAttribute("item", mapper.toResponse(appraisal.getPledgedItem()));
         model.addAttribute("appraisal", mapper.toResponse(appraisal));
         return "appraisals/result";
