@@ -118,9 +118,4 @@ public class PawnTicket {
     public boolean isPastGrace(LocalDate asOf) {
         return asOf.isAfter(graceEndDate);
     }
-
-	public Long getId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
