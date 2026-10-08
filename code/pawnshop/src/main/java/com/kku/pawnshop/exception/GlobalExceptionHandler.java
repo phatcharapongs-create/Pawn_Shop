@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1. จัดการ 404 Not Found หรือ Exception ที่กำหนด status มาเอง
+    // 1. จัดการ 404 Not Found (กรณีใช้ ResponseStatusException หรือหาข้อมูลไม่พบ)
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
         ErrorResponse error = new ErrorResponse(
@@ -26,7 +26,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, ex.getStatusCode());
     }
 
-    // 2. จัดการ 409 Duplicate Resource (เช่น เลขบัตรประชาชนซ้ำ)
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage() != null ? ex.getMessage() : "ไม่พบข้อมูลที่ต้องการ",
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    // 2. จัดการ 409 Conflict (เลขบัตรประชาชนซ้ำ / สถานะตั๋วไม่ถูกต้อง / ลบลูกค้าที่มีตั๋วจำนำค้างอยู่)
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException ex) {
         ErrorResponse error = new ErrorResponse(
@@ -37,21 +47,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
-    // 3. จัดการ 400 Validation Error (เช่น กรอกข้อมูลไม่ครบ/เลขบัตรไม่ครบ 13 หลัก)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
-            errors.put(error.getField(), error.getDefaultMessage())
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("message", "Validation Failed");
-        response.put("errors", errors);
-        response.put("timestamp", LocalDateTime.now());
+    // 3. จัดการ 400 Validation Error (@NotBlank, @Pattern) โดยยังคงใช้ ErrorResponse ตามข้อตกลงทีม
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String detailMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "ข้อมูลไม่ถูกต้อง: " + detailMessage,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     // 4. จัดการ IllegalArgumentException ทั่วไป (แปลงเป็น 400 Bad Request)
