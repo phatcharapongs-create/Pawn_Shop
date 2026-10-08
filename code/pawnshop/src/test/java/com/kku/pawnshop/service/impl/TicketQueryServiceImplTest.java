@@ -71,4 +71,20 @@ public class TicketQueryServiceImplTest {
 
 		assertEquals(Money.of(150), result);
 	}
+	
+	@Test
+	void findByTicketNumber_existingTicket_returnsTicket() {
+		PawnTicket ticket = new PawnTicket();
+		when(ticketRepository.findByTicketNumber("PT0001")).thenReturn(Optional.of(ticket));
+		
+		PawnTicket result = service.findByTicketNumber("PT0001");
+		
+		assertSame(ticket, result);
+	}
+	@Test
+	void findByTicketNumber_missingTicket_throwsNotFound() {
+		when(ticketRepository.findByTicketNumber("PT9999")).thenReturn(Optional.empty());
+		
+		assertThrows(ResourceNotFoundException.class, () -> service.findByTicketNumber("PT9999"));
+	}
 }
