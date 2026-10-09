@@ -34,4 +34,7 @@ public interface PawnTicketRepository extends JpaRepository<PawnTicket, Long> {
 
     /** ทรัพย์ชิ้นนี้ถูกผูกกับตั๋วไปแล้วหรือยัง กันออกตั๋วซ้ำให้ทรัพย์ชิ้นเดียว */
     boolean existsByPledgedItemId(Long pledgedItemId);
+
+    /** ตรวจสอบว่าลูกค้ามีตั๋วจำนำในระบบหรือไม่ (ใช้เช็กก่อนลบลูกค้า ตอบ 409) */
+    boolean existsByCustomerId(Long customerId);
 }
