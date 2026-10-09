@@ -1,10 +1,11 @@
 package com.kku.pawnshop.service.impl;
 
+import com.kku.pawnshop.domain.entity.Customer;
 import com.kku.pawnshop.dto.request.CustomerRequest;
 import com.kku.pawnshop.dto.response.CustomerResponse;
 import com.kku.pawnshop.exception.DuplicateResourceException;
+import com.kku.pawnshop.exception.ResourceNotFoundException;
 import com.kku.pawnshop.mapper.CustomerMapper;
-import com.kku.pawnshop.domain.entity.Customer;
 import com.kku.pawnshop.repository.CustomerRepository;
 import com.kku.pawnshop.repository.PawnTicketRepository;
 import com.kku.pawnshop.service.CustomerService;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
@@ -24,24 +28,33 @@ public class CustomerServiceImpl implements CustomerService {
     private final PawnTicketRepository pawnTicketRepository;
     private final CustomerMapper customerMapper;
 
+    // === การทำงานกับ DTO (สำหรับ Web Controller / UI) ===
+
     @Override
     @Transactional(readOnly = true)
-    public Page<CustomerResponse> getAllCustomers(Pageable pageable) {
+    public List<CustomerResponse> findAll() {
+        return customerRepository.findAll().stream()
+                .map(customerMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CustomerResponse> findAllResponses(Pageable pageable) {
         return customerRepository.findAll(pageable)
                 .map(customerMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CustomerResponse getCustomerById(Long id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ไม่พบข้อมูลลูกค้า ID: " + id));
+    public CustomerResponse findResponseById(Long id) {
+        Customer customer = findById(id);
         return customerMapper.toResponse(customer);
     }
 
     @Override
     @Transactional
-    public CustomerResponse createCustomer(CustomerRequest request) {
+    public CustomerResponse create(CustomerRequest request) {
         if (customerRepository.existsByCitizenId(request.getCitizenId())) {
             throw new DuplicateResourceException("เลขประจำตัวประชาชนนี้มีอยู่ในระบบแล้ว: " + request.getCitizenId());
         }
@@ -52,9 +65,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ไม่พบข้อมูลลูกค้า ID: " + id));
+    public CustomerResponse update(Long id, CustomerRequest request) {
+        Customer customer = findById(id);
 
         if (!customer.getCitizenId().equals(request.getCitizenId()) &&
                 customerRepository.existsByCitizenId(request.getCitizenId())) {
@@ -66,18 +78,60 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toResponse(updatedCustomer);
     }
 
+    // === การทำงานกับ Entity (สำหรับสมาชิกในทีมเรียกใช้) ===
+
     @Override
     @Transactional
-    public void deleteCustomer(Long id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ไม่พบข้อมูลลูกค้า ID: " + id));
+    public Customer create(Customer customer) {
+        if (customer.getCitizenId() != null && customerRepository.existsByCitizenId(customer.getCitizenId())) {
+            throw new DuplicateResourceException("เลขประจำตัวประชาชนนี้มีอยู่ในระบบแล้ว: " + customer.getCitizenId());
+        }
+        return customerRepository.save(customer);
+    }
 
-        // ตรวจสอบเงื่อนไขตามข้อกำหนด: หากมีตั๋วจำนำผูกอยู่ ห้ามลบและตอบ 409 Conflict
+    @Override
+    @Transactional
+    public Customer update(Long id, Customer customer) {
+        Customer existing = findById(id);
+        if (customer.getCitizenId() != null && !existing.getCitizenId().equals(customer.getCitizenId()) &&
+                customerRepository.existsByCitizenId(customer.getCitizenId())) {
+            throw new DuplicateResourceException("เลขประจำตัวประชาชนนี้ถูกใช้งานโดยลูกค้ารายอื่นแล้ว");
+        }
+        customer.setId(id);
+        return customerRepository.save(customer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Customer findById(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบข้อมูลลูกค้า ID: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Customer> findAll(Pageable pageable) {
+        return customerRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        Customer customer = findById(id);
+
+        // เช็กประวัติตั๋วจำนำ หากมีอยู่จะโยน 409 Conflict
         boolean hasActiveTickets = pawnTicketRepository.existsByCustomerId(id);
         if (hasActiveTickets) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "ไม่สามารถลบข้อมูลลูกค้าได้ เนื่องจากมีประวัติตั๋วจำนำอยู่ในระบบ");
         }
 
         customerRepository.delete(customer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void assertEligibleToPawn(Long customerId) {
+        // ตรวจสอบว่ามีข้อมูลลูกค้าในระบบหรือไม่
+        findById(customerId);
     }
 }
