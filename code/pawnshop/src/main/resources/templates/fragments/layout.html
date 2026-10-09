@@ -10,29 +10,38 @@
 </head>
 <body>
 
-    <!-- Navbar -->
+    <!-- Navbar ครบ 8 เมนูตามข้อกำหนด -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/}">Pawnshop System</a>
+            <a class="navbar-brand" th:href="@{/customers}">Pawnshop System</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/}">หน้าแรก</a>
+                        <a class="nav-link" th:href="@{/tickets/new}">ออกตั๋วจำนำ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/customers}">จัดการข้อมูลลูกค้า</a>
+                        <a class="nav-link" th:href="@{/tickets}">รายการตั๋ว</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/pawn-tickets}">รายการตั๋วจำนำ</a>
+                        <a class="nav-link" th:href="@{/customers}">จัดการลูกค้า</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/employees}">จัดการพนักงาน</a>
+                        <a class="nav-link" th:href="@{/appraisals/new}">ประเมินราคา</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/reference-prices}">ราคากลางอ้างอิง</a>
+                        <a class="nav-link" th:href="@{/gold-prices}">ราคาทอง</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/forfeited-items}">ทรัพย์หลุดจำนำ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/reports/daily}">รายงานประจำวัน</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/notifications}">การแจ้งเตือน</a>
                     </li>
                 </ul>
             </div>
