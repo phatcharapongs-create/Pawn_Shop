@@ -4,7 +4,7 @@ import com.kku.pawnshop.dto.request.CustomerRequest;
 import com.kku.pawnshop.dto.response.CustomerResponse;
 import com.kku.pawnshop.exception.DuplicateResourceException;
 import com.kku.pawnshop.mapper.CustomerMapper;
-import com.kku.pawnshop.model.Customer;
+import com.kku.pawnshop.domain.entity.Customer;
 import com.kku.pawnshop.repository.CustomerRepository;
 import com.kku.pawnshop.repository.PawnTicketRepository;
 import com.kku.pawnshop.service.CustomerService;

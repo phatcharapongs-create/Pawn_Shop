@@ -1,6 +1,6 @@
 package com.kku.pawnshop.service.impl;
 
-import com.kku.pawnshop.model.Employee;
+import com.kku.pawnshop.domain.entity.Employee;
 import com.kku.pawnshop.repository.EmployeeRepository;
 import com.kku.pawnshop.service.EmployeeService;
 import lombok.RequiredArgsConstructor;

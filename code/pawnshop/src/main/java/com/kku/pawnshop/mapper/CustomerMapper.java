@@ -2,7 +2,7 @@ package com.kku.pawnshop.mapper;
 
 import com.kku.pawnshop.dto.request.CustomerRequest;
 import com.kku.pawnshop.dto.response.CustomerResponse;
-import com.kku.pawnshop.model.Customer;
+import com.kku.pawnshop.domain.entity.Customer;
 import org.springframework.stereotype.Component;
 
 @Component
