@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>รับจำนำ</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2 class="mb-4">รับจำนำ / ออกตั๋วใหม่</h2>
+
+    <div class="alert alert-info">
+        ทรัพย์ต้องผ่านการประเมินราคาก่อน (เมนูประเมินราคา) แล้วนำรหัสทรัพย์มากรอกที่นี่
+    </div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/pawn-tickets}" th:object="${form}" method="post" class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label">รหัสลูกค้า</label>
+            <input type="number" class="form-control" th:field="*{customerId}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('customerId')}" th:errors="*{customerId}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">รหัสทรัพย์ที่ประเมินแล้ว</label>
+            <input type="number" class="form-control" th:field="*{pledgedItemId}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('pledgedItemId')}" th:errors="*{pledgedItemId}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">เงินต้นที่ขอ (บาท) — ต้องไม่เกินวงเงินสูงสุดจากผลประเมิน</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{principal}">
+            <div class="text-danger small" th:if="${#fields.hasErrors('principal')}" th:errors="*{principal}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">รหัสพนักงาน (ไม่บังคับ)</label>
+            <input type="number" class="form-control" th:field="*{employeeId}">
+        </div>
+        <button type="submit" class="btn btn-primary">ออกตั๋ว</button>
+        <a th:href="@{/pawn-tickets}" class="btn btn-outline-secondary">ยกเลิก</a>
+    </form>
+</div>
+</body>
+</html>

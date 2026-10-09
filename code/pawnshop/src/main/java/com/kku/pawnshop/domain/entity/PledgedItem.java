@@ -1,6 +1,7 @@
 package com.kku.pawnshop.domain.entity;
 
 import com.kku.pawnshop.domain.enums.ItemType;
+import com.kku.pawnshop.domain.vo.Money;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,6 +54,11 @@ public class PledgedItem {
     @Column(name = "manufacture_year")
     private Integer manufactureYear;
 
+    /** ราคาอ้างอิงของรุ่น สำหรับเครื่องใช้ไฟฟ้า นาฬิกา และเครื่องประดับ */
+    @Embedded
+    @AttributeOverride(name = "amount", column = @Column(name = "reference_price", precision = 15, scale = 2))
+    private Money referencePrice;
+
     /** คะแนนสภาพ 1-5 ใช้เป็นตัวคูณลดราคา */
     @Column(name = "condition_grade")
     private Integer conditionGrade;
@@ -63,3 +69,5 @@ public class PledgedItem {
     @Column(name = "photo_url", length = 300)
     private String photoUrl;
 }
+
+
