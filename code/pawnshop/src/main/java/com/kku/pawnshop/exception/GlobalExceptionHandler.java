@@ -1,96 +1,109 @@
 package com.kku.pawnshop.exception;
 
 import com.kku.pawnshop.dto.response.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1. จัดการ 404 Not Found (กรณีใช้ ResponseStatusException หรือหาข้อมูลไม่พบ)
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
-        ErrorResponse error = new ErrorResponse(
-                ex.getStatusCode().value(),
-                ex.getReason() != null ? ex.getReason() : ex.getMessage(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, ex.getStatusCode());
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
-        ErrorResponse error = new ErrorResponse(
+    // 1. ดักจับ ResourceNotFoundException (404 NOT FOUND)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
-                ex.getMessage() != null ? ex.getMessage() : "ไม่พบข้อมูลที่ต้องการ",
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
-
-    // 2. จัดการ 409 Conflict (เลขบัตรประชาชนซ้ำ / สถานะตั๋วไม่ถูกต้อง / ลบลูกค้าที่มีตั๋วจำนำค้างอยู่)
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.CONFLICT.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
                 ex.getMessage(),
+                request.getRequestURI(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
-        ErrorResponse error = new ErrorResponse(
+    // 2. ดักจับ InvalidTicketOperationException และ DuplicateResourceException (409 CONFLICT)
+    @ExceptionHandler({InvalidTicketOperationException.class, DuplicateResourceException.class})
+    public ResponseEntity<ErrorResponse> handleConflictExceptions(
+            RuntimeException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
                 ex.getMessage(),
+                request.getRequestURI(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    // 3. จัดการ 400 Validation Error (@NotBlank, @Pattern) โดยยังคงใช้ ErrorResponse ตามข้อตกลงทีม
+    // 3. ดักจับ BusinessRuleViolationException (400 BAD REQUEST)
+    @ExceptionHandler(BusinessRuleViolationException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessRuleViolationException(
+            BusinessRuleViolationException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    // 4. ดักจับ Validation Error จาก @Valid (400 BAD REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String detailMessage = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
 
-        ErrorResponse error = new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "ข้อมูลไม่ถูกต้อง: " + detailMessage,
-                LocalDateTime.now()
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "ข้อมูลที่ส่งมาไม่ถูกต้องตามเงื่อนไข",
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                errors
         );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // 4. จัดการ IllegalArgumentException ทั่วไป (แปลงเป็น 400 Bad Request)
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
+    // 5. ดักจับ ResponseStatusException
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getStatusCode().value(),
+                ex.getReason(),
+                ex.getReason(),
+                request.getRequestURI(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
     }
 
-    // 5. จัดการ Error อื่นๆ ที่ไม่ได้ระบุไว้ (500 Internal Server Error)
+    // 6. ดักจับ Exception ทั่วไป (500 INTERNAL SERVER ERROR)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse error = new ErrorResponse(
+    public ResponseEntity<ErrorResponse> handleGeneralException(
+            Exception ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 "เกิดข้อผิดพลาดภายในระบบ: " + ex.getMessage(),
+                request.getRequestURI(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
