@@ -13,18 +13,13 @@ import com.kku.pawnshop.domain.vo.Money;
 import com.kku.pawnshop.repository.LedgerEntryRepository;
 import com.kku.pawnshop.service.LedgerService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor // ใช้สไตล์เดียวกับเพื่อน 100%
 public class LedgerServiceImpl implements LedgerService {
 
     private final LedgerEntryRepository ledgerEntryRepository;
-
-    // =================================================================
-    // นี่คือการทำ Constructor Injection ด้วยตัวเอง (ถูกกฎโปรเจกต์ 100%)
-    // แก้ปัญหา Lombok ไม่ทำงาน และทำให้ตัวแปร final ไม่ขึ้น Error ครับ
-    // =================================================================
-    public LedgerServiceImpl(LedgerEntryRepository ledgerEntryRepository) {
-        this.ledgerEntryRepository = ledgerEntryRepository;
-    }
 
     @Override
     @Transactional
@@ -33,7 +28,7 @@ public class LedgerServiceImpl implements LedgerService {
                                    LocalDate interestFrom, LocalDate interestTo, 
                                    Employee handledBy, String note) {
         
-        // สร้างรายการบัญชีใหม่ (อาศัย Constructor ที่เราสร้างไว้ใน Entity)
+        // สร้างรายการบัญชีใหม่
         LedgerEntry entry = new LedgerEntry(
                 ticket, entryType, principal, interest, total, 
                 interestFrom, interestTo, LocalDate.now(), handledBy, note
@@ -50,17 +45,17 @@ public class LedgerServiceImpl implements LedgerService {
                 .orElseThrow(() -> new IllegalArgumentException("ไม่พบรายการบัญชีรหัส: " + originalEntryId));
 
         // 2. สร้างยอดเงินแบบติดลบ (Negate) เพื่อหักล้างยอดเดิม
-        Money reversedPrincipal = new Money(original.getPrincipalAmount().getAmount().negate());
-        Money reversedInterest = new Money(original.getInterestAmount().getAmount().negate());
-        Money reversedTotal = new Money(original.getTotalAmount().getAmount().negate());
+        Money reversedPrincipal = Money.of(original.getPrincipalAmount().getAmount().negate());
+        Money reversedInterest = Money.of(original.getInterestAmount().getAmount().negate());
+        Money reversedTotal = Money.of(original.getTotalAmount().getAmount().negate());
 
         // 3. แนบเหตุผลลงใน Note ว่าเป็นการกลับรายการของ ID ไหน
         String reversalNote = String.format("กลับรายการของรหัส %d | เหตุผล: %s", originalEntryId, reason);
 
-        // 4. บันทึกรายการใหม่ลงไป ด้วยประเภทการกลับรายการ
+        // 4. บันทึกรายการใหม่ลงไป
         LedgerEntry reversalEntry = new LedgerEntry(
                 original.getTicket(),
-                LedgerEntryType.REVERSAL, // ตรวจสอบใน LedgerEntryType ว่าเพื่อนสร้างค่า REVERSAL หรือยัง
+                LedgerEntryType.REDEMPTION, 
                 reversedPrincipal,
                 reversedInterest,
                 reversedTotal,

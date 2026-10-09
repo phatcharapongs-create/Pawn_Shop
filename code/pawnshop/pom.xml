@@ -55,6 +55,19 @@
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
 
+		<!-- H2 Database Driver สำหรับทดสอบในเครื่อง -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Thymeleaf Layout Dialect สำหรับจัดการ Navbar ของทีม -->
+		<dependency>
+			<groupId>nz.net.ultraq.thymeleaf</groupId>
+			<artifactId>thymeleaf-layout-dialect</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -142,5 +155,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

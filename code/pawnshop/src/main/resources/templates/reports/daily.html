@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>รายงานประจำวัน | โรงรับจำนำ มหาวิทยาลัยขอนแก่น</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/pawnshop.css}" href="../../static/css/pawnshop.css">
+</head>
+<body>
+
+<header class="site-header">
+  <h1>โรงรับจำนำ มหาวิทยาลัยขอนแก่น</h1>
+  <p>ระบบบริหารจัดการตั๋วจำนำ</p>
+</header>
+
+<main class="page">
+
+  <h2 class="report-title">รายงานธุรกรรมประจำวัน</h2>
+  <p class="report-meta">
+    ประจำวันที่ <strong th:text="${#temporals.format(reportDate, 'dd/MM/yyyy')}">01/01/2026</strong>
+    &nbsp;|&nbsp; จำนวน <span th:text="${#lists.size(entries)}">0</span> รายการ
+  </p>
+
+  <!-- เลือกวันที่ -->
+  <form class="filter" method="get" th:action="@{/reports/daily}">
+    <label for="date">เลือกวันที่</label>
+    <input type="date" id="date" name="date" th:value="${reportDate}">
+    <button type="submit" class="btn">แสดงรายงาน</button>
+    <button type="button" class="btn secondary" onclick="window.print()">พิมพ์รายงาน</button>
+  </form>
+
+  <!-- สรุปยอด: ต้องมี summary ใน model (ดูหมายเหตุท้ายไฟล์) -->
+  <dl class="summary">
+    <div>
+      <dt>เงินต้นที่รับจำนำ</dt>
+      <dd th:text="${#numbers.formatDecimal(summary.totalPawned.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
+    </div>
+    <div>
+      <dt>ดอกเบี้ยที่ได้รับ</dt>
+      <dd th:text="${#numbers.formatDecimal(summary.totalInterest.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
+    </div>
+    <div>
+      <dt>เงินที่รับไถ่ถอน</dt>
+      <dd th:text="${#numbers.formatDecimal(summary.totalRedeemed.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
+    </div>
+    <div>
+      <dt>จำนวนรายการ</dt>
+      <dd th:text="${#lists.size(entries)}">0</dd>
+    </div>
+  </dl>
+
+  <h2 class="section-title">รายการธุรกรรม</h2>
+  <div th:replace="~{fragments/ledger-table :: ledgerTable(${entries}, true)}"></div>
+
+  <!-- ช่องลงนาม แสดงเฉพาะตอนพิมพ์ -->
+  <div class="signatures">
+    <div><div class="line">ผู้จัดทำรายงาน</div></div>
+    <div><div class="line">ผู้ตรวจสอบ</div></div>
+    <div><div class="line">ผู้จัดการ</div></div>
+  </div>
+
+</main>
+
+<!--
+  หมายเหตุสำหรับ Controller: ต้องส่งเข้า Model
+    reportDate : LocalDate
+    entries    : List<LedgerEntry>
+    summary    : มี totalPawned, totalInterest, totalRedeemed (ชนิด Money)
+-->
+</body>
+</html>

@@ -1,0 +1,106 @@
+:root {
+  --white: #ffffff;
+  --paper: #f5f5f5;
+  --line: #d4d4d4;
+  --gray: #6b6b6b;
+  --ink: #1f1f1f;
+  --black: #000000;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: "Sarabun", "Noto Sans Thai", "Tahoma", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.site-header {
+  background: var(--black);
+  color: var(--white);
+  padding: 1rem 2rem;
+}
+.site-header h1 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+.site-header p { margin: 0; color: #bdbdbd; font-size: 0.875rem; }
+
+.page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+.report-title { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 700; }
+.report-meta { margin: 0 0 1.5rem; color: var(--gray); }
+
+.filter {
+  display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+  padding: 0.75rem 1rem; margin-bottom: 1.5rem;
+  background: var(--paper); border: 1px solid var(--line);
+}
+.filter label { font-weight: 600; }
+.filter input[type="date"] {
+  padding: 0.35rem 0.5rem; border: 1px solid var(--gray);
+  background: var(--white); font: inherit;
+}
+.btn {
+  padding: 0.4rem 1.25rem; border: 1px solid var(--black);
+  background: var(--black); color: var(--white); font: inherit; cursor: pointer;
+}
+.btn:hover { background: var(--ink); }
+.btn.secondary { background: var(--white); color: var(--black); }
+.btn.secondary:hover { background: var(--paper); }
+.btn:focus-visible, input:focus-visible { outline: 3px solid var(--gray); outline-offset: 2px; }
+
+/* สรุปยอดรายวัน */
+.summary {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--black); margin-bottom: 2rem;
+}
+.summary > div { padding: 1rem 1.25rem; border-right: 1px solid var(--line); }
+.summary > div:last-child { border-right: 0; background: var(--paper); }
+.summary dt { color: var(--gray); font-size: 0.875rem; }
+.summary dd { margin: 0; font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+h2.section-title {
+  margin: 0 0 0.75rem; padding-bottom: 0.5rem;
+  font-size: 1.125rem; border-bottom: 2px solid var(--black);
+}
+
+/* ตารางสมุดบัญชี */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+.ledger { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 1rem; line-height: 1.5; }
+.ledger th, .ledger td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+.ledger thead th { background: var(--black); color: var(--white); border-bottom: 0; font-weight: 600; white-space: nowrap; }
+.ledger tbody tr:nth-child(even) { background: #f7f7f7; }
+.ledger tbody tr:hover { background: #e9e9e9; }
+.ledger td:first-child { white-space: nowrap; }
+.ledger .ticket { font-weight: 700; white-space: nowrap; }
+.ledger .period { color: var(--gray); font-size: 0.9rem; white-space: nowrap; }
+.ledger .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ledger .zero { color: #a3a3a3; }
+.ledger .neg { font-weight: 600; }
+.ledger .total { font-weight: 700; border-left: 1px solid var(--gray); }
+.ledger .note { color: var(--gray); font-size: 0.875rem; min-width: 180px; max-width: 260px; }
+.ledger tfoot td { border-top: 2px solid var(--black); border-bottom: 0; font-weight: 700; background: var(--paper); }
+.ledger .empty { text-align: center; color: var(--gray); padding: 2rem 0; }
+
+.tag { display: inline-block; padding: 0.15rem 0.7rem; border: 1px solid var(--black); font-size: 0.8125rem; white-space: nowrap; }
+.tag.pawn { background: var(--black); color: var(--white); }
+.tag.interest { background: var(--white); color: var(--black); }
+.tag.redeem { background: var(--line); color: var(--black); border-color: var(--gray); }
+
+.signatures { display: flex; justify-content: space-between; gap: 2rem; margin-top: 4rem; }
+.signatures div { flex: 1; text-align: center; }
+.signatures .line { border-top: 1px solid var(--black); margin-top: 3rem; padding-top: 0.5rem; }
+
+@media (max-width: 700px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+  .summary > div { border-bottom: 1px solid var(--line); }
+}
+
+@media print {
+  .site-header, .filter, .no-print { display: none; }
+  .page { max-width: none; padding: 0; }
+  .ledger { min-width: 0; font-size: 10pt; }
+  .ledger tbody tr:hover { background: none; }
+  body { font-size: 12pt; }
+}
