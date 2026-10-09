@@ -88,3 +88,7 @@ sequenceDiagram
         end
     end
 ```
+
+## Sequence Diagram — รับจำนำและออกตั๋ว
+
+![Sequence Diagram รับจำนำ](open-ticket-sequence-diagram.png)
