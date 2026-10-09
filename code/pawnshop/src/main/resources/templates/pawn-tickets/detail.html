@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>รายละเอียดตั๋ว</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>ตั๋วเลขที่ <span th:text="${ticket.ticketNumber}">PT000001</span></h2>
+        <span class="badge bg-secondary fs-6" th:text="${ticket.statusDisplay}">ในกำหนด</span>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <table class="table w-auto">
+        <tr><th>ลูกค้า</th><td th:text="${ticket.customerName}">-</td></tr>
+        <tr><th>ทรัพย์</th><td th:text="${ticket.itemDescription}">-</td></tr>
+        <tr><th>เงินต้น</th>
+            <td th:text="${#numbers.formatDecimal(ticket.principal, 1, 'COMMA', 2, 'POINT')} + ' บาท'">-</td></tr>
+        <tr><th>วันจำนำ</th><td th:text="${ticket.pawnDate}">-</td></tr>
+        <tr><th>จ่ายดอกถึงวันที่</th><td th:text="${ticket.interestPaidUntil}">-</td></tr>
+        <tr><th>ครบกำหนดไถ่ถอน</th><td th:text="${ticket.dueDate}">-</td></tr>
+        <tr><th>สิ้นสุดช่วงผ่อนผัน</th><td th:text="${ticket.graceEndDate}">-</td></tr>
+    </table>
+
+    <!-- ปุ่มแสดงตาม canRenew / canRedeem ที่ถามจาก State — HTML ไม่ต้องรู้กฎสถานะเอง -->
+    <div class="row g-3" th:if="${ticket.canRenew or ticket.canRedeem}">
+        <div class="col-md-6" th:if="${ticket.canRenew}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">ต่อดอก</h5>
+                    <p>ดอกที่ต้องจ่ายวันนี้:
+                        <strong th:text="${#numbers.formatDecimal(renewalInterest, 1, 'COMMA', 2, 'POINT')} + ' บาท'">0</strong></p>
+                    <form th:action="@{/pawn-tickets/{id}/renew(id=${ticket.id})}" method="post">
+                        <input type="number" name="employeeId" class="form-control mb-2" placeholder="รหัสพนักงาน (ไม่บังคับ)">
+                        <button class="btn btn-primary" type="submit">ยืนยันต่อดอก</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6" th:if="${ticket.canRedeem}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">ไถ่ถอน</h5>
+                    <p>ยอดไถ่ถอนวันนี้ (เงินต้น + ดอก):
+                        <strong th:text="${#numbers.formatDecimal(redemptionAmount, 1, 'COMMA', 2, 'POINT')} + ' บาท'">0</strong></p>
+                    <form th:action="@{/pawn-tickets/{id}/redeem(id=${ticket.id})}" method="post"
+                          onsubmit="return confirm('ยืนยันการไถ่ถอน?')">
+                        <input type="number" name="employeeId" class="form-control mb-2" placeholder="รหัสพนักงาน (ไม่บังคับ)">
+                        <button class="btn btn-danger" type="submit">ยืนยันไถ่ถอน</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="text-muted" th:unless="${ticket.canRenew or ticket.canRedeem}">ตั๋วอยู่ในสถานะที่ทำธุรกรรมไม่ได้แล้ว</p>
+
+    <a class="btn btn-outline-secondary mt-4" th:href="@{/pawn-tickets}">กลับไปรายการ</a>
+</div>
+</body>
+</html>
