@@ -14,12 +14,18 @@ public class CustomerMapper {
         }
         CustomerResponse response = new CustomerResponse();
         response.setId(customer.getId());
-        response.setName(customer.getName());
+
+        // รวม firstName และ lastName เป็น name
+        String firstName = customer.getFirstName() != null ? customer.getFirstName() : "";
+        String lastName = customer.getLastName() != null ? customer.getLastName() : "";
+        response.setName((firstName + " " + lastName).trim());
+
         response.setCitizenId(customer.getCitizenId());
-        response.setPhoneNumber(customer.getPhoneNumber());
+        response.setPhoneNumber(customer.getPhone()); // เปลี่ยนเป็น getPhone()
         response.setAddress(customer.getAddress());
         response.setCreatedAt(customer.getCreatedAt());
-        response.setUpdatedAt(customer.getUpdatedAt());
+        // ลบ setUpdatedAt ออกเพราะ Entity Customer ไม่มี field นี้
+        
         return response;
     }
 
@@ -28,10 +34,7 @@ public class CustomerMapper {
             return null;
         }
         Customer customer = new Customer();
-        customer.setName(request.getName());
-        customer.setCitizenId(request.getCitizenId());
-        customer.setPhoneNumber(request.getPhoneNumber());
-        customer.setAddress(request.getAddress());
+        updateEntityFromRequest(request, customer);
         return customer;
     }
 
@@ -39,9 +42,16 @@ public class CustomerMapper {
         if (request == null || customer == null) {
             return;
         }
-        customer.setName(request.getName());
+
+        // แยก name ออกเป็น firstName และ lastName
+        if (request.getName() != null) {
+            String[] parts = request.getName().trim().split("\\s+", 2);
+            customer.setFirstName(parts[0]);
+            customer.setLastName(parts.length > 1 ? parts[1] : "");
+        }
+
         customer.setCitizenId(request.getCitizenId());
-        customer.setPhoneNumber(request.getPhoneNumber());
+        customer.setPhone(request.getPhoneNumber()); // เปลี่ยนเป็น setPhone()
         customer.setAddress(request.getAddress());
     }
 }
