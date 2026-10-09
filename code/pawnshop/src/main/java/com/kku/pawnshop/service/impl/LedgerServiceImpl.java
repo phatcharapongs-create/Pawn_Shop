@@ -55,7 +55,7 @@ public class LedgerServiceImpl implements LedgerService {
         // 4. บันทึกรายการใหม่ลงไป
         LedgerEntry reversalEntry = new LedgerEntry(
                 original.getTicket(),
-                LedgerEntryType.REDEMPTION, 
+                original.getEntryType(), // <--- แก้ไขตรงนี้: ใช้ประเภทเดียวกับรายการเดิม
                 reversedPrincipal,
                 reversedInterest,
                 reversedTotal,

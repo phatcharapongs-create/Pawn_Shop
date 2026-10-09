@@ -12,31 +12,30 @@ public class HalfMonthFractionRule implements MonthFractionRule {
     @Override
     public BigDecimal chargeableMonths(LocalDate from, LocalDate to) {
         if (from == null || to == null || to.isBefore(from)) {
-            return BigDecimal.ZERO;
+            return new BigDecimal("0.0");
         }
 
-        // 1. หาจำนวนเดือนเต็ม
         long fullMonths = ChronoUnit.MONTHS.between(from, to);
         
-        // 2. หาวันที่เหลือเศษหลังจากหักเดือนเต็มออกไปแล้ว
         LocalDate dateAfterFullMonths = from.plusMonths(fullMonths);
         long remainingDays = ChronoUnit.DAYS.between(dateAfterFullMonths, to);
 
-        BigDecimal totalMonths = BigDecimal.valueOf(fullMonths);
+        // บังคับให้เดือนเต็มมีทศนิยม 1 ตำแหน่ง (เช่น 1 -> 1.0)
+        BigDecimal totalMonths = BigDecimal.valueOf(fullMonths).setScale(1);
 
-        // 3. กฎการปัดเศษตามธรรมเนียมโรงรับจำนำ
         if (fullMonths == 0 && remainingDays == 0) {
-            // จำนำและไถ่ถอนในวันเดียวกัน คิดขั้นต่ำครึ่งเดือน
             return new BigDecimal("0.5"); 
-        } else if (remainingDays > 0 && remainingDays <= 15) {
-            // เศษไม่เกิน 15 วัน ปัดเป็นครึ่งเดือน
+        } else if (remainingDays > 0 && remainingDays <= 14) { 
             return totalMonths.add(new BigDecimal("0.5"));
-        } else if (remainingDays > 15) {
-            // เศษเกิน 15 วัน ปัดเป็น 1 เดือนเต็ม
-            return totalMonths.add(BigDecimal.ONE);
+        } else if (remainingDays > 14) {
+            // แก้จาก BigDecimal.ONE เป็น "1.0"
+            return totalMonths.add(new BigDecimal("1.0")); 
         }
 
-        // กรณีลงตัวพอดีเดือน (remainingDays == 0)
         return totalMonths;
+    }
+
+    public BigDecimal calculateMonthFraction(LocalDate from, LocalDate to) {
+        return chargeableMonths(from, to);
     }
 }

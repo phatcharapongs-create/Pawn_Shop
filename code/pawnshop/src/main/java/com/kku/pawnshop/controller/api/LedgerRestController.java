@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kku.pawnshop.domain.entity.Employee;
 import com.kku.pawnshop.domain.entity.LedgerEntry;
 import com.kku.pawnshop.dto.response.LedgerEntryResponse;
 import com.kku.pawnshop.mapper.LedgerEntryMapper;
@@ -33,10 +32,8 @@ public class LedgerRestController {
             @PathVariable Long id,
             @RequestParam String reason) {
         
-        // จำลองข้อมูลพนักงานที่ทำการล็อกอิน
-        Employee currentEmployee = new Employee(); 
-        
-        LedgerEntry reversedEntity = ledgerService.reverseEntry(id, currentEmployee, reason);
+        // แก้ไข: ส่ง null แทน new Employee() ป้องกัน Error บันทึกพนักงานที่ไม่มีใน DB
+        LedgerEntry reversedEntity = ledgerService.reverseEntry(id, null, reason);
         LedgerEntryResponse response = ledgerEntryMapper.toResponse(reversedEntity);
         
         return ResponseEntity.ok(response);
