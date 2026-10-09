@@ -1,0 +1,28 @@
+stateDiagram-v2
+    direction LR
+    [*] --> ACTIVE : openTicket()<br/>รับจำนำ
+
+    ACTIVE --> ACTIVE : renewInterest()<br/>ต่อดอก
+    ACTIVE --> REDEEMED : redeem()<br/>ไถ่ถอน
+    ACTIVE --> GRACE : promoteOverdueToGrace()<br/>[เลยวันครบกำหนด]
+
+    GRACE --> ACTIVE : renewInterest()<br/>ต่อดอก
+    GRACE --> REDEEMED : redeem()<br/>ไถ่ถอน
+    GRACE --> FORFEITED : forfeitExpired()<br/>[พ้นช่วงผ่อนผัน]
+
+    ACTIVE --> SEIZED : seize()<br/>อายัด
+    GRACE --> SEIZED : seize()<br/>อายัด
+    SEIZED --> ACTIVE : releaseSeizure()<br/>[ยังไม่เลยกำหนด]
+    SEIZED --> GRACE : releaseSeizure()<br/>[เลยกำหนดแล้ว]
+
+    FORFEITED --> SOLD : recordSale()<br/>จำหน่ายทรัพย์
+
+    REDEEMED --> [*]
+    SOLD --> [*]
+
+    ACTIVE : ACTIVE (ในกำหนด)
+    GRACE : GRACE (ผ่อนผัน)
+    SEIZED : SEIZED (ถูกอายัด)
+    FORFEITED : FORFEITED (หลุดจำนำ)
+    REDEEMED : REDEEMED (ไถ่ถอนแล้ว)
+    SOLD : SOLD (จำหน่ายแล้ว)
