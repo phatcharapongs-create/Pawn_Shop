@@ -31,4 +31,7 @@ public interface PawnTicketRepository extends JpaRepository<PawnTicket, Long> {
     List<PawnTicket> findByStatusAndDueDateBetween(TicketStatus status, LocalDate from, LocalDate to);
 
     long countByStatus(TicketStatus status);
+
+    /** ทรัพย์ชิ้นนี้ถูกผูกกับตั๋วไปแล้วหรือยัง กันออกตั๋วซ้ำให้ทรัพย์ชิ้นเดียว */
+    boolean existsByPledgedItemId(Long pledgedItemId);
 }
