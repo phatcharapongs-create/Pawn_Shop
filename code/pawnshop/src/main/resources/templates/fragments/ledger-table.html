@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  ใช้งาน: <div th:replace="~{fragments/ledger-table :: ledgerTable(${entries}, true)}"></div>
+  พารามิเตอร์:
+    entries    = List<LedgerEntry>
+    showTicket = true แสดงคอลัมน์เลขที่ตั๋ว (หน้ารายงาน), false ซ่อน (หน้าประวัติของตั๋วใบเดียว)
+-->
+<section th:fragment="ledgerTable(entries, showTicket)" class="table-wrap">
+  <table class="ledger">
+    <thead>
+      <tr>
+        <th>วันที่</th>
+        <th th:if="${showTicket}">เลขที่ตั๋ว</th>
+        <th>ประเภทรายการ</th>
+        <th>ช่วงดอกเบี้ย</th>
+        <th class="num">เงินต้น (บาท)</th>
+        <th class="num">ดอกเบี้ย (บาท)</th>
+        <th class="num">รวม (บาท)</th>
+        <th>ผู้ทำรายการ</th>
+        <th>หมายเหตุ</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr th:each="e : ${entries}">
+        <td th:text="${#temporals.format(e.entryDate, 'dd/MM/yyyy')}">01/01/2026</td>
+
+        <td th:if="${showTicket}" class="ticket" th:text="${e.ticket.ticketNumber}">T-0001</td>
+
+        <td th:switch="${e.entryType.name()}">
+          <span th:case="'PAWN'" class="tag pawn">จำนำ</span>
+          <span th:case="'INTEREST_PAYMENT'" class="tag interest">ชำระดอกเบี้ย</span>
+          <span th:case="'REDEMPTION'" class="tag redeem">ไถ่ถอน</span>
+          <span th:case="*" class="tag" th:text="${e.entryType}">-</span>
+        </td>
+
+        <td class="period">
+          <span th:if="${e.interestFrom != null and e.interestTo != null}"
+                th:text="${#temporals.format(e.interestFrom, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(e.interestTo, 'dd/MM/yyyy')}">
+            01/01/2026 - 01/02/2026
+          </span>
+          <span th:unless="${e.interestFrom != null and e.interestTo != null}">-</span>
+        </td>
+
+        <!-- ยอดติดลบ (รายการกลับรายการ) จะแสดงเป็นตัวหนา มีเครื่องหมายลบ -->
+        <td class="num" th:classappend="${e.principalAmount.amount.signum() < 0} ? 'neg' : (${e.principalAmount.amount.signum() == 0} ? 'zero')"
+            th:text="${#numbers.formatDecimal(e.principalAmount.amount, 1, 'COMMA', 2, 'POINT')}">1,000.00</td>
+        <td class="num" th:classappend="${e.interestAmount.amount.signum() < 0} ? 'neg' : (${e.interestAmount.amount.signum() == 0} ? 'zero')"
+            th:text="${#numbers.formatDecimal(e.interestAmount.amount, 1, 'COMMA', 2, 'POINT')}">20.00</td>
+        <td class="num total" th:classappend="${e.totalAmount.amount.signum() < 0} ? 'neg' : (${e.totalAmount.amount.signum() == 0} ? 'zero')"
+            th:text="${#numbers.formatDecimal(e.totalAmount.amount, 1, 'COMMA', 2, 'POINT')}">1,020.00</td>
+
+        <td th:text="${e.handledBy != null ? e.handledBy.firstName + ' ' + e.handledBy.lastName : '-'}">เจ้าหน้าที่</td>
+        <td class="note" th:text="${e.note}">-</td>
+      </tr>
+
+      <tr th:if="${#lists.isEmpty(entries)}">
+        <td class="empty" th:colspan="${showTicket ? 9 : 8}">ไม่มีรายการในช่วงเวลาที่เลือก</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>

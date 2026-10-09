@@ -3,79 +3,95 @@ package com.kku.pawnshop.domain.entity;
 import com.kku.pawnshop.domain.enums.LedgerEntryType;
 import com.kku.pawnshop.domain.vo.Money;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * รายการธุรกรรมของตั๋ว — เจ้าของ: สมาชิก D
- *
- * ตารางนี้เป็น append-only ห้าม UPDATE และห้าม DELETE เด็ดขาด
- * ถ้าบันทึกผิดให้ออกรายการกลับรายการใหม่ ไม่ใช่ไปแก้ของเดิม
- *
- * เหตุผล: ระบบการเงินต้องตรวจสอบย้อนหลังได้ว่ายอดปัจจุบันมาจากไหน
- * ถ้าเก็บยอดคงเหลือเป็นฟิลด์ใน PawnTicket แล้ว UPDATE ทับไปเรื่อย ๆ
- * เมื่อยอดผิดจะไม่มีทางรู้เลยว่าผิดตั้งแต่ธุรกรรมไหน
- */
 @Entity
-@Table(name = "ledger_entry", indexes = {
-        @Index(name = "idx_ledger_ticket", columnList = "ticket_id"),
-        @Index(name = "idx_ledger_date", columnList = "entry_date")
-})
-@Getter
-@Setter
-@NoArgsConstructor
+@Table(name = "ledger_entry")
 public class LedgerEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ticket_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticket_id", updatable = false)
     private PawnTicket ticket;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "entry_type", nullable = false, length = 30)
+    @Column(name = "entry_type", updatable = false)
     private LedgerEntryType entryType;
 
     @Embedded
-    @AttributeOverride(name = "amount", column = @Column(name = "principal_amount", nullable = false, precision = 15, scale = 2))
+    @AttributeOverrides({
+        @AttributeOverride(name = "amount", column = @Column(name = "principal_amount", updatable = false))
+    })
     private Money principalAmount;
 
     @Embedded
-    @AttributeOverride(name = "amount", column = @Column(name = "interest_amount", nullable = false, precision = 15, scale = 2))
+    @AttributeOverrides({
+        @AttributeOverride(name = "amount", column = @Column(name = "interest_amount", updatable = false))
+    })
     private Money interestAmount;
 
     @Embedded
-    @AttributeOverride(name = "amount", column = @Column(name = "total_amount", nullable = false, precision = 15, scale = 2))
+    @AttributeOverrides({
+        @AttributeOverride(name = "amount", column = @Column(name = "total_amount", updatable = false))
+    })
     private Money totalAmount;
 
-    /** ช่วงเวลาที่ดอกเบี้ยรายการนี้ครอบคลุม ใช้ตรวจสอบย้อนหลัง */
-    @Column(name = "interest_from")
+    @Column(name = "interest_from", updatable = false)
     private LocalDate interestFrom;
 
-    @Column(name = "interest_to")
+    @Column(name = "interest_to", updatable = false)
     private LocalDate interestTo;
 
-    @Column(name = "entry_date", nullable = false)
+    @Column(name = "entry_date", updatable = false)
     private LocalDate entryDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "handled_by")
+    @JoinColumn(name = "handled_by", updatable = false)
     private Employee handledBy;
 
-    @Column(name = "note", length = 300)
+    @Column(updatable = false)
     private String note;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @PrePersist
-    void onCreate() {
+    // 1. Default Constructor สำหรับให้ Spring Boot ใช้งาน
+    protected LedgerEntry() {}
+
+    // 2. Constructor สำหรับบันทึกรายการบัญชี (ตรงกับที่คุณเรียกใช้ใน LedgerServiceImpl)
+    public LedgerEntry(PawnTicket ticket, LedgerEntryType entryType, Money principalAmount, 
+                       Money interestAmount, Money totalAmount, LocalDate interestFrom, 
+                       LocalDate interestTo, LocalDate entryDate, Employee handledBy, String note) {
+        this.ticket = ticket;
+        this.entryType = entryType;
+        this.principalAmount = principalAmount;
+        this.interestAmount = interestAmount;
+        this.totalAmount = totalAmount;
+        this.interestFrom = interestFrom;
+        this.interestTo = interestTo;
+        this.entryDate = entryDate;
+        this.handledBy = handledBy;
+        this.note = note;
         this.createdAt = LocalDateTime.now();
     }
+
+    // ==========================================
+    // เขียน GETTER เองทั้งหมด (ไม่ง้อ Lombok)
+    // ==========================================
+    public Long getId() { return id; }
+    public PawnTicket getTicket() { return ticket; }
+    public LedgerEntryType getEntryType() { return entryType; }
+    public Money getPrincipalAmount() { return principalAmount; }
+    public Money getInterestAmount() { return interestAmount; }
+    public Money getTotalAmount() { return totalAmount; }
+    public LocalDate getInterestFrom() { return interestFrom; }
+    public LocalDate getInterestTo() { return interestTo; }
+    public LocalDate getEntryDate() { return entryDate; }
+    public Employee getHandledBy() { return handledBy; }
+    public String getNote() { return note; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
