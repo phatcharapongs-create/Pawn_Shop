@@ -131,7 +131,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional(readOnly = true)
     public void assertEligibleToPawn(Long customerId) {
-        // ตรวจสอบว่ามีข้อมูลลูกค้าในระบบหรือไม่
-        findById(customerId);
+        Customer customer = findById(customerId);
+        if (customer.isBlacklisted()) {
+            throw new IllegalStateException("ลูกค้าติดสถานะ Blacklist ไม่สามารถทำรายการได้");
+        }
     }
 }
