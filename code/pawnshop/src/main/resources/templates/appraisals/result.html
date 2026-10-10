@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ผลประเมินทรัพย์ | โรงรับจำนำ มหาวิทยาลัยขอนแก่น</title>
+    <link rel="stylesheet" th:href="@{/css/pawnshop.css}" href="../../static/css/pawnshop.css">
+    <link rel="stylesheet" th:href="@{/css/appraisal.css}" href="../../static/css/appraisal.css">
+</head>
+<body>
+<header class="site-header">
+    <h1>โรงรับจำนำ มหาวิทยาลัยขอนแก่น</h1>
+    <p>ระบบบริหารจัดการตั๋วจำนำ</p>
+</header>
+<main class="page appraisal-page">
+    <p class="appraisal-kicker">PAWNSHOP · APPRAISAL</p>
+    <h2 class="report-title">ผลการประเมินราคา</h2>
+    <p class="report-meta">บันทึกผลประเมินทรัพย์เรียบร้อยแล้ว</p>
+
+    <section class="appraisal-result" aria-labelledby="result-heading">
+        <div class="result-heading">
+            <div>
+                <p class="result-label">รายละเอียดทรัพย์</p>
+                <h3 id="result-heading" th:text="${item.description}">รายละเอียดทรัพย์</h3>
+            </div>
+            <span class="tag" th:text="${item.itemType}">GOLD</span>
+        </div>
+        <dl class="result-details">
+            <div><dt>รหัสทรัพย์</dt><dd th:text="${item.id}">1</dd></div>
+            <div><dt>เลขประจำทรัพย์</dt><dd th:text="${item.serialNumber != null ? item.serialNumber : '—'}">—</dd></div>
+            <div><dt>วันที่ประเมิน</dt><dd th:text="${#temporals.format(appraisal.appraisedAt, 'dd/MM/yyyy HH:mm')}">09/10/2026 10:00</dd></div>
+        </dl>
+        <div class="result-values">
+            <div class="result-value">
+                <span>มูลค่าประเมิน</span>
+                <strong th:text="|${#numbers.formatDecimal(appraisal.appraisedValue, 1, 'COMMA', 2, 'POINT')} บาท|">0.00 บาท</strong>
+            </div>
+            <div class="result-value result-value-primary">
+                <span>วงเงินจำนำสูงสุด</span>
+                <strong th:text="|${#numbers.formatDecimal(appraisal.maxLoanAmount, 1, 'COMMA', 2, 'POINT')} บาท|">0.00 บาท</strong>
+            </div>
+        </div>
+        <p class="gold-snapshot" th:if="${appraisal.goldPriceSnapshot != null}">
+            ราคาทองที่ใช้คำนวณ: <strong th:text="|${#numbers.formatDecimal(appraisal.goldPriceSnapshot, 1, 'COMMA', 2, 'POINT')} บาท/กรัม|">0.00 บาท/กรัม</strong>
+        </p>
+    </section>
+    <div class="appraisal-actions">
+        <a class="btn secondary" th:href="@{/pawn-tickets}">กลับรายการตั๋ว</a>
+        <a class="btn" th:href="@{/appraisals/new}">ประเมินทรัพย์ชิ้นใหม่</a>
+    </div>
+</main>
+</body>
+</html>
