@@ -10,21 +10,17 @@
   <link rel="stylesheet" th:href="@{/css/pawnshop.css}" href="../../static/css/pawnshop.css">
 </head>
 <body>
-
 <header class="site-header">
   <h1>โรงรับจำนำ มหาวิทยาลัยขอนแก่น</h1>
   <p>ระบบบริหารจัดการตั๋วจำนำ</p>
 </header>
-
 <main class="page">
-
   <h2 class="report-title">รายงานธุรกรรมประจำวัน</h2>
   <p class="report-meta">
     ประจำวันที่ <strong th:text="${#temporals.format(reportDate, 'dd/MM/yyyy')}">01/01/2026</strong>
-    &nbsp;|&nbsp; จำนวน <span th:text="${#lists.size(entries)}">0</span> รายการ
+    &nbsp;|&nbsp; จำนวน <span th:text="${summary.totalEntriesCount}">0</span> รายการ
   </p>
 
-  <!-- เลือกวันที่ -->
   <form class="filter" method="get" th:action="@{/reports/daily}">
     <label for="date">เลือกวันที่</label>
     <input type="date" id="date" name="date" th:value="${reportDate}">
@@ -32,7 +28,6 @@
     <button type="button" class="btn secondary" onclick="window.print()">พิมพ์รายงาน</button>
   </form>
 
-  <!-- สรุปยอด: ต้องมี summary ใน model (ดูหมายเหตุท้ายไฟล์) -->
   <dl class="summary">
     <div>
       <dt>เงินต้นที่รับจำนำ</dt>
@@ -48,27 +43,53 @@
     </div>
     <div>
       <dt>จำนวนรายการ</dt>
-      <dd th:text="${#lists.size(entries)}">0</dd>
+      <dd th:text="${summary.totalEntriesCount}">0</dd>
     </div>
   </dl>
 
   <h2 class="section-title">รายการธุรกรรม</h2>
-  <div th:replace="~{fragments/ledger-table :: ledgerTable(${entries}, true)}"></div>
+  <div class="table-wrap">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th>เวลา</th><th>เลขที่ตั๋ว</th><th>ประเภทรายการ</th><th>ช่วงดอกเบี้ย</th>
+          <th class="num">เงินต้น (บาท)</th><th class="num">ดอกเบี้ย (บาท)</th>
+          <th class="num">รวม (บาท)</th><th>ผู้ทำรายการ</th><th>หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="entry : ${entries}">
+          <td th:text="${entry.time}">12:00</td>
+          <td class="ticket-cell" th:text="${entry.ticketNumber}">PT000001</td>
+          <td th:switch="${entry.entryType}">
+            <span th:case="'PAWN'" class="tag pawn">จำนำ</span>
+            <span th:case="'INTEREST_PAYMENT'" class="tag interest">ชำระดอกเบี้ย</span>
+            <span th:case="'REDEMPTION'" class="tag redeem">ไถ่ถอน</span>
+            <span th:case="*" class="tag" th:text="${entry.entryType}">อื่น ๆ</span>
+          </td>
+          <td class="period">
+            <span th:if="${entry.interestFrom != null and entry.interestTo != null}"
+                  th:text="|${#temporals.format(entry.interestFrom, 'dd/MM/yyyy')} - ${#temporals.format(entry.interestTo, 'dd/MM/yyyy')}|">01/01/2026 - 01/02/2026</span>
+            <span th:unless="${entry.interestFrom != null and entry.interestTo != null}">-</span>
+          </td>
+          <td class="num" th:text="${#numbers.formatDecimal(entry.principalAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+          <td class="num" th:text="${#numbers.formatDecimal(entry.interestAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+          <td class="num total" th:text="${#numbers.formatDecimal(entry.totalAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+          <td th:text="${entry.handledBy}">เจ้าหน้าที่</td>
+          <td class="note" th:text="${entry.note != null ? entry.note : '-'}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(entries)}">
+          <td class="empty" colspan="9">ไม่มีรายการธุรกรรมในวันที่เลือก</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  <!-- ช่องลงนาม แสดงเฉพาะตอนพิมพ์ -->
   <div class="signatures">
     <div><div class="line">ผู้จัดทำรายงาน</div></div>
     <div><div class="line">ผู้ตรวจสอบ</div></div>
     <div><div class="line">ผู้จัดการ</div></div>
   </div>
-
 </main>
-
-<!--
-  หมายเหตุสำหรับ Controller: ต้องส่งเข้า Model
-    reportDate : LocalDate
-    entries    : List<LedgerEntry>
-    summary    : มี totalPawned, totalInterest, totalRedeemed (ชนิด Money)
--->
 </body>
 </html>
