@@ -1,17 +1,17 @@
 package com.kku.pawnshop.controller.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kku.pawnshop.dto.request.CustomerRequest;
 import com.kku.pawnshop.dto.response.CustomerResponse;
 import com.kku.pawnshop.service.CustomerService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +32,7 @@ class CustomerRestControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private CustomerService customerService;
 
     // 1. GET - รายการลูกค้าทั้งหมด (Pagination)
@@ -43,7 +43,7 @@ class CustomerRestControllerTest {
         );
         PageImpl<CustomerResponse> page = new PageImpl<>(List.of(customerResponse), PageRequest.of(0, 10), 1);
 
-        given(customerService.getAllCustomers(any())).willReturn(page);
+        given(customerService.findAllResponses(any())).willReturn(page);
 
         mockMvc.perform(get("/api/v1/customers")
                 .accept(MediaType.APPLICATION_JSON))
@@ -59,7 +59,7 @@ class CustomerRestControllerTest {
                 1L, "สมชาย ใจดี", "1234567890123", "0812345678", "ขอนแก่น", LocalDateTime.now(), LocalDateTime.now()
         );
 
-        given(customerService.getCustomerById(1L)).willReturn(customerResponse);
+        given(customerService.findResponseById(1L)).willReturn(customerResponse);
 
         mockMvc.perform(get("/api/v1/customers/1")
                 .accept(MediaType.APPLICATION_JSON))
@@ -75,7 +75,7 @@ class CustomerRestControllerTest {
         CustomerRequest request = new CustomerRequest("สมชาย ใจดี", "1234567890123", "0812345678", "ขอนแก่น");
         CustomerResponse response = new CustomerResponse(1L, "สมชาย ใจดี", "1234567890123", "0812345678", "ขอนแก่น", LocalDateTime.now(), LocalDateTime.now());
 
-        given(customerService.createCustomer(any(CustomerRequest.class))).willReturn(response);
+        given(customerService.create(any(CustomerRequest.class))).willReturn(response);
 
         mockMvc.perform(post("/api/v1/customers")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +103,7 @@ class CustomerRestControllerTest {
         CustomerRequest request = new CustomerRequest("สมชาย ใจดีมาก", "1234567890123", "0812345678", "ขอนแก่น");
         CustomerResponse response = new CustomerResponse(1L, "สมชาย ใจดีมาก", "1234567890123", "0812345678", "ขอนแก่น", LocalDateTime.now(), LocalDateTime.now());
 
-        given(customerService.updateCustomer(eq(1L), any(CustomerRequest.class))).willReturn(response);
+        given(customerService.update(eq(1L), any(CustomerRequest.class))).willReturn(response);
 
         mockMvc.perform(put("/api/v1/customers/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +115,7 @@ class CustomerRestControllerTest {
     // 6. DELETE - ลบข้อมูลลูกค้า (204 No Content)
     @Test
     void deleteCustomer_WhenSuccess_ShouldReturnNoContent() throws Exception {
-        doNothing().when(customerService).deleteCustomer(1L);
+        doNothing().when(customerService).delete(1L);
 
         mockMvc.perform(delete("/api/v1/customers/1"))
                 .andExpect(status().isNoContent());
