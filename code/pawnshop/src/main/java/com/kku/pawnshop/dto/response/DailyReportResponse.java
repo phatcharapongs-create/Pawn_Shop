@@ -3,6 +3,7 @@ package com.kku.pawnshop.dto.response;
 import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -32,9 +33,12 @@ public class DailyReportResponse {
         private String time;
         private String ticketNumber;
         private String entryType;
+        private LocalDate interestFrom;
+        private LocalDate interestTo;
         private MoneyDto principalAmount;
         private MoneyDto interestAmount;
         private MoneyDto totalAmount;
         private String handledBy;
+        private String note;
     }
 }

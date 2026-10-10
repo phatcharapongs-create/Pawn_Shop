@@ -18,4 +18,6 @@ public interface LedgerService {
 
     // กลับรายการ (Compensating Entry) กรณีบันทึกผิด
     LedgerEntry reverseEntry(Long originalEntryId, Employee handledBy, String reason);
+
+    boolean hasInterestPaymentOn(Long ticketId, LocalDate entryDate);
 }
