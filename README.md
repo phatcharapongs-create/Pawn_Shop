@@ -41,8 +41,7 @@
 | API Docs | springdoc-openapi (Swagger UI) |
 | Testing | JUnit 5 + Mockito + Spring Boot Test |
 | Container | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
-| Deployment | _(รอระบุ)_ |
+| Deployment | Render (Docker) + PostgreSQL บน cloud |
  
 ---
  
@@ -165,7 +164,7 @@ docker compose up --build
  
 ## API Documentation
  
-Swagger UI: http://localhost:8080/swagger-ui.html
+Swagger UI: https://pawn-shop-fg3j.onrender.com/swagger-ui/index.html
  
 **Endpoint หลัก**
  
@@ -211,7 +210,7 @@ cd code
  
 ## Deployment URL
  
-_(รอ deploy — ต้องใช้งานได้จริง ณ วันนำเสนอ)_
+https://pawn-shop-fg3j.onrender.com
  
 ---
  
