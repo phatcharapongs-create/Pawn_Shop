@@ -165,7 +165,7 @@ docker compose up --build
  
 ## API Documentation
  
-Swagger UI: http://localhost:8080/swagger-ui.html
+Swagger UI: https://pawn-shop-fg3j.onrender.com/swagger-ui/index.html
  
 **Endpoint หลัก**
  
@@ -211,7 +211,7 @@ cd code
  
 ## Deployment URL
  
-(https://pawn-shop-fg3j.onrender.com/customers;jsessionid=28F25CE76C437B6096487308648D3C59)
+https://pawn-shop-fg3j.onrender.com
  
 ---
  
