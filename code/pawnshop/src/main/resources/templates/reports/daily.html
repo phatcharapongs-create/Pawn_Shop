@@ -1,95 +1,54 @@
 <!DOCTYPE html>
-<html lang="th" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>รายงานประจำวัน | โรงรับจำนำ มหาวิทยาลัยขอนแก่น</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" th:href="@{/css/pawnshop.css}" href="../../static/css/pawnshop.css">
-</head>
-<body>
-<header class="site-header">
-  <h1>โรงรับจำนำ มหาวิทยาลัยขอนแก่น</h1>
-  <p>ระบบบริหารจัดการตั๋วจำนำ</p>
-</header>
-<main class="page">
-  <h2 class="report-title">รายงานธุรกรรมประจำวัน</h2>
-  <p class="report-meta">
-    ประจำวันที่ <strong th:text="${#temporals.format(reportDate, 'dd/MM/yyyy')}">01/01/2026</strong>
-    &nbsp;|&nbsp; จำนวน <span th:text="${summary.totalEntriesCount}">0</span> รายการ
-  </p>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head><title>รายงานประจำวัน</title><link rel="stylesheet" th:href="@{/css/report.css}"></head>
+<body><div layout:fragment="content">
+    <div class="page-head"><div>
+        <span class="eyebrow">DAILY REPORT</span>
+        <h1 class="page-title">รายงานธุรกรรมประจำวัน</h1>
+        <p class="page-sub">ประจำวันที่ <strong th:text="${#temporals.format(reportDate, 'dd/MM/yyyy')}">01/01/2026</strong>
+            &nbsp;|&nbsp; จำนวน <span th:text="${summary.totalEntriesCount}">0</span> รายการ</p>
+    </div></div>
 
-  <form class="filter" method="get" th:action="@{/reports/daily}">
-    <label for="date">เลือกวันที่</label>
-    <input type="date" id="date" name="date" th:value="${reportDate}">
-    <button type="submit" class="btn">แสดงรายงาน</button>
-    <button type="button" class="btn secondary" onclick="window.print()">พิมพ์รายงาน</button>
-  </form>
+    <form class="filter" method="get" th:action="@{/reports/daily}">
+        <label for="date">เลือกวันที่</label>
+        <input type="date" id="date" name="date" class="control" th:value="${reportDate}">
+        <button type="submit" class="btn btn-dark">แสดงรายงาน</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-outline" onclick="window.print()">พิมพ์รายงาน</button>
+    </form>
 
-  <dl class="summary">
-    <div>
-      <dt>เงินต้นที่รับจำนำ</dt>
-      <dd th:text="${#numbers.formatDecimal(summary.totalPawned.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
-    </div>
-    <div>
-      <dt>ดอกเบี้ยที่ได้รับ</dt>
-      <dd th:text="${#numbers.formatDecimal(summary.totalInterest.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
-    </div>
-    <div>
-      <dt>เงินที่รับไถ่ถอน</dt>
-      <dd th:text="${#numbers.formatDecimal(summary.totalRedeemed.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
-    </div>
-    <div>
-      <dt>จำนวนรายการ</dt>
-      <dd th:text="${summary.totalEntriesCount}">0</dd>
-    </div>
-  </dl>
+    <dl class="summary">
+        <div><dt>เงินต้นที่รับจำนำ (บาท)</dt><dd th:text="${#numbers.formatDecimal(summary.totalPawned.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd></div>
+        <div><dt>ดอกเบี้ยที่ได้รับ (บาท)</dt><dd th:text="${#numbers.formatDecimal(summary.totalInterest.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd></div>
+        <div><dt>เงินที่รับไถ่ถอน (บาท)</dt><dd th:text="${#numbers.formatDecimal(summary.totalRedeemed.amount, 1, 'COMMA', 2, 'POINT')}">0.00</dd></div>
+        <div><dt>จำนวนรายการ</dt><dd th:text="${summary.totalEntriesCount}">0</dd></div>
+    </dl>
 
-  <h2 class="section-title">รายการธุรกรรม</h2>
-  <div class="table-wrap">
-    <table class="ledger">
-      <thead>
-        <tr>
-          <th>เวลา</th><th>เลขที่ตั๋ว</th><th>ประเภทรายการ</th><th>ช่วงดอกเบี้ย</th>
-          <th class="num">เงินต้น (บาท)</th><th class="num">ดอกเบี้ย (บาท)</th>
-          <th class="num">รวม (บาท)</th><th>ผู้ทำรายการ</th><th>หมายเหตุ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr th:each="entry : ${entries}">
-          <td th:text="${entry.time}">12:00</td>
-          <td class="ticket-cell" th:text="${entry.ticketNumber}">PT000001</td>
-          <td th:switch="${entry.entryType}">
-            <span th:case="'PAWN'" class="tag pawn">จำนำ</span>
-            <span th:case="'INTEREST_PAYMENT'" class="tag interest">ชำระดอกเบี้ย</span>
-            <span th:case="'REDEMPTION'" class="tag redeem">ไถ่ถอน</span>
-            <span th:case="*" class="tag" th:text="${entry.entryType}">อื่น ๆ</span>
-          </td>
-          <td class="period">
-            <span th:if="${entry.interestFrom != null and entry.interestTo != null}"
-                  th:text="|${#temporals.format(entry.interestFrom, 'dd/MM/yyyy')} - ${#temporals.format(entry.interestTo, 'dd/MM/yyyy')}|">01/01/2026 - 01/02/2026</span>
-            <span th:unless="${entry.interestFrom != null and entry.interestTo != null}">-</span>
-          </td>
-          <td class="num" th:text="${#numbers.formatDecimal(entry.principalAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
-          <td class="num" th:text="${#numbers.formatDecimal(entry.interestAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
-          <td class="num total" th:text="${#numbers.formatDecimal(entry.totalAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
-          <td th:text="${entry.handledBy}">เจ้าหน้าที่</td>
-          <td class="note" th:text="${entry.note != null ? entry.note : '-'}">-</td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(entries)}">
-          <td class="empty" colspan="9">ไม่มีรายการธุรกรรมในวันที่เลือก</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <h2 class="section-title report-section">รายการธุรกรรม</h2>
+    <section class="table-wrap">
+        <table class="ledger">
+            <thead><tr><th>เวลา</th><th>เลขที่ตั๋ว</th><th>ประเภทรายการ</th><th>ช่วงดอกเบี้ย</th><th class="num">เงินต้น (บาท)</th><th class="num">ดอกเบี้ย (บาท)</th><th class="num">รวม (บาท)</th><th>ผู้ทำรายการ</th><th>หมายเหตุ</th></tr></thead>
+            <tbody>
+                <tr th:each="entry : ${entries}">
+                    <td th:text="${entry.time}">12:00</td>
+                    <td class="ticket-cell" th:text="${entry.ticketNumber}">PT000001</td>
+                    <td th:switch="${entry.entryType}">
+                        <span th:case="'PAWN'" class="tag pawn">จำนำ</span>
+                        <span th:case="'INTEREST_PAYMENT'" class="tag interest">ชำระดอกเบี้ย</span>
+                        <span th:case="'REDEMPTION'" class="tag redeem">ไถ่ถอน</span>
+                        <span th:case="*" class="tag" th:text="${entry.entryType}">อื่น ๆ</span>
+                    </td>
+                    <td class="period"><span th:if="${entry.interestFrom != null and entry.interestTo != null}" th:text="|${#temporals.format(entry.interestFrom, 'dd/MM/yyyy')} - ${#temporals.format(entry.interestTo, 'dd/MM/yyyy')}|">01/01/2026 - 01/02/2026</span><span th:unless="${entry.interestFrom != null and entry.interestTo != null}">-</span></td>
+                    <td class="num" th:text="${#numbers.formatDecimal(entry.principalAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                    <td class="num" th:text="${#numbers.formatDecimal(entry.interestAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                    <td class="num total" th:text="${#numbers.formatDecimal(entry.totalAmount.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                    <td th:text="${entry.handledBy}">เจ้าหน้าที่</td>
+                    <td class="note" th:text="${entry.note != null ? entry.note : '-'}">-</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(entries)}"><td class="empty" colspan="9">ไม่มีรายการธุรกรรมในวันที่เลือก</td></tr>
+            </tbody>
+        </table>
+    </section>
 
-  <div class="signatures">
-    <div><div class="line">ผู้จัดทำรายงาน</div></div>
-    <div><div class="line">ผู้ตรวจสอบ</div></div>
-    <div><div class="line">ผู้จัดการ</div></div>
-  </div>
-</main>
-</body>
-</html>
+    <div class="signatures"><div><div class="line">ผู้จัดทำรายงาน</div></div><div><div class="line">ผู้ตรวจสอบ</div></div><div><div class="line">ผู้จัดการ</div></div></div>
+</div></body></html>

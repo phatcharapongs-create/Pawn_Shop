@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head>
+    <title>สินค้าพร้อมจำหน่าย</title>
+    <link rel="stylesheet" th:href="@{/css/customer-products.css}">
+</head>
+<body><div layout:fragment="content">
+    <div class="page-head">
+        <div><span class="eyebrow">PAWNSHOP PRODUCTS</span><h1 class="page-title">สินค้าที่โรงรับจำนำจำหน่าย</h1><p class="page-sub">เลือกชมทรัพย์ที่พร้อมจำหน่าย สอบถามราคาและตรวจสอบสินค้าจริงได้ที่โรงรับจำนำ</p></div>
+        <a class="btn btn-outline" th:href="@{/customer}">กลับไปตั๋วของฉัน</a>
+    </div>
+
+    <div class="products-count"><span class="products-count-icon" aria-hidden="true">◇</span><span>สินค้าพร้อมจำหน่าย</span><strong th:text="${products.totalElements}">0</strong><span>รายการ</span></div>
+
+    <section class="product-grid" aria-label="รายการสินค้าพร้อมจำหน่าย">
+        <article class="product-card" th:each="product : ${products.content}">
+            <div class="product-image">
+                <img th:if="${product.photoUrl != null and !#strings.isEmpty(product.photoUrl)}" th:src="${product.photoUrl}" th:alt="${product.description}" loading="lazy">
+                <span th:unless="${product.photoUrl != null and !#strings.isEmpty(product.photoUrl)}" class="product-image-placeholder" aria-label="ไม่มีรูปสินค้า">◇</span>
+                <span class="product-available">พร้อมจำหน่าย</span>
+            </div>
+            <div class="product-details">
+                <span class="product-type" th:switch="${product.itemType}">
+                    <span th:case="'GOLD'">ทองคำ</span><span th:case="'ELECTRONICS'">เครื่องใช้ไฟฟ้า</span>
+                    <span th:case="'JEWELRY'">เครื่องประดับ</span><span th:case="*" th:text="${product.itemType}">สินค้า</span>
+                </span>
+                <h2 th:text="${product.description}">รายละเอียดสินค้า</h2>
+                <dl class="product-specs">
+                    <div th:if="${product.conditionGrade != null}"><dt>สภาพ</dt><dd><span th:text="${product.conditionGrade}">3</span>/5</dd></div>
+                    <div th:if="${product.weightGram != null}"><dt>น้ำหนัก</dt><dd><span th:text="${#numbers.formatDecimal(product.weightGram, 1, 'COMMA', 3, 'POINT')}">0.000</span> กรัม</dd></div>
+                    <div th:if="${product.purityPercent != null}"><dt>ความบริสุทธิ์</dt><dd><span th:text="${#numbers.formatDecimal(product.purityPercent, 1, 'COMMA', 2, 'POINT')}">96.50</span>%</dd></div>
+                    <div th:if="${product.manufactureYear != null}"><dt>ปีผลิต</dt><dd th:text="${product.manufactureYear}">2024</dd></div>
+                </dl>
+                <div class="product-price"><span>ราคาจำหน่าย</span><strong>สอบถามที่ร้าน</strong></div>
+            </div>
+        </article>
+        <div class="products-empty" th:if="${products.empty}">
+            <span class="products-empty-icon" aria-hidden="true">◇</span>
+            <h2>ขณะนี้ยังไม่มีสินค้าพร้อมจำหน่าย</h2>
+            <p>เมื่อมีทรัพย์รายการใหม่ ร้านจะแสดงในหน้านี้</p>
+        </div>
+    </section>
+
+    <nav th:if="${products.totalPages > 1}" aria-label="เปลี่ยนหน้า"><ul class="pagination">
+        <li th:classappend="${products.first} ? 'disabled'"><a th:href="@{/customer/products(page=${products.number - 1})}">ก่อนหน้า</a></li>
+        <li class="active"><span th:text="|${products.number + 1} / ${products.totalPages}|">1 / 1</span></li>
+        <li th:classappend="${products.last} ? 'disabled'"><a th:href="@{/customer/products(page=${products.number + 1})}">ถัดไป</a></li>
+    </ul></nav>
+</div></body></html>

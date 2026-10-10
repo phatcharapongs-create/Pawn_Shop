@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head>
+    <title>ตั๋วของฉัน</title>
+    <link rel="stylesheet" th:href="@{/css/customer-dashboard.css}">
+</head>
+<body>
+<div layout:fragment="content" class="customer-dashboard">
+    <section class="customer-welcome">
+        <div class="customer-welcome-copy">
+            <span class="eyebrow">CUSTOMER PORTAL</span>
+            <h1>ยินดีต้อนรับ <span th:text="${customerName}">ลูกค้า</span></h1>
+            <p>ติดตามตั๋วจำนำและเลือกชมทรัพย์ที่พร้อมจำหน่ายได้จากที่นี่</p>
+        </div>
+        <div class="customer-ticket-count" aria-label="จำนวนตั๋วจำนำ">
+            <span class="customer-count-icon" aria-hidden="true">▤</span>
+            <span><strong th:text="${tickets.totalElements}">0</strong><small>ตั๋วจำนำของคุณ</small></span>
+        </div>
+        <span class="customer-welcome-watermark" aria-hidden="true">✦</span>
+    </section>
+
+    <section class="customer-shortcuts" aria-label="ทางลัด">
+        <a class="customer-shortcut customer-shortcut-primary" th:href="@{/customer/products}">
+            <span class="shortcut-icon" aria-hidden="true">◇</span>
+            <span class="shortcut-copy"><strong>สินค้าพร้อมจำหน่าย</strong><small>เลือกชมทรัพย์ที่โรงรับจำนำจำหน่าย</small></span>
+            <span class="shortcut-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="customer-shortcut" th:href="@{/account/password}">
+            <span class="shortcut-icon shortcut-icon-neutral" aria-hidden="true">⌑</span>
+            <span class="shortcut-copy"><strong>จัดการบัญชี</strong><small>เปลี่ยนรหัสผ่านและดูแลบัญชีของคุณ</small></span>
+            <span class="shortcut-arrow" aria-hidden="true">→</span>
+        </a>
+    </section>
+
+    <section class="customer-tickets-section">
+        <div class="customer-section-heading">
+            <div><span class="eyebrow">YOUR PAWN TICKETS</span><h2>ตั๋วจำนำของฉัน</h2></div>
+            <p>ข้อมูลตั๋วที่เชื่อมโยงกับบัญชีของคุณ</p>
+        </div>
+
+        <div class="customer-empty-state" th:if="${tickets.empty}">
+            <span class="empty-state-icon" aria-hidden="true">▤</span>
+            <h3>ยังไม่มีตั๋วจำนำในบัญชีนี้</h3>
+            <p>เมื่อมีตั๋วจำนำที่เชื่อมโยงกับบัญชี รายการจะแสดงที่นี่</p>
+            <a class="btn btn-primary" th:href="@{/customer/products}">เลือกชมสินค้าพร้อมจำหน่าย <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="customer-ticket-card" th:unless="${tickets.empty}">
+            <div class="table-wrap customer-ticket-table-wrap">
+                <table class="table customer-ticket-table">
+                    <thead><tr><th>เลขที่ตั๋ว</th><th>ทรัพย์</th><th>วันที่จำนำ</th><th>วันครบกำหนด</th><th class="num">เงินต้น (บาท)</th><th>สถานะ</th></tr></thead>
+                    <tbody>
+                    <tr th:each="ticket : ${tickets.content}">
+                        <td><strong class="customer-ticket-number" th:text="${ticket.ticketNumber}">PT000001</strong></td>
+                        <td th:text="${ticket.itemDescription}">ทรัพย์</td>
+                        <td th:text="${#temporals.format(ticket.pawnDate, 'dd/MM/yyyy')}">01/01/2026</td>
+                        <td th:text="${#temporals.format(ticket.dueDate, 'dd/MM/yyyy')}">01/02/2026</td>
+                        <td class="num customer-principal" th:text="${#numbers.formatDecimal(ticket.principal, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                        <td><span class="badge" th:text="${ticket.statusDisplay}">สถานะ</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <nav class="customer-pagination" th:if="${tickets.totalPages > 1}" aria-label="เปลี่ยนหน้า">
+            <ul class="pagination">
+                <li th:classappend="${tickets.first} ? 'disabled'"><a th:href="@{/customer(page=${tickets.number - 1})}">ก่อนหน้า</a></li>
+                <li class="active"><span th:text="|${tickets.number + 1} / ${tickets.totalPages}|">1 / 1</span></li>
+                <li th:classappend="${tickets.last} ? 'disabled'"><a th:href="@{/customer(page=${tickets.number + 1})}">ถัดไป</a></li>
+            </ul>
+        </nav>
+    </section>
+</div>
+</body>
+</html>

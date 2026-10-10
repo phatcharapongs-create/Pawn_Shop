@@ -1,75 +1,94 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="th"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout}">
 <head>
     <title th:text="${customerId != null ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่'}">จัดการข้อมูลลูกค้า</title>
+    <link rel="stylesheet" th:href="@{/css/customer.css}">
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0" th:text="${customerId != null ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่'}">ฟอร์มข้อมูลลูกค้า</h4>
-                    </div>
-                    <div class="card-body">
+<div layout:fragment="content">
 
-                        <!-- แจ้งเตือนข้อผิดพลาดจาก Service -->
-                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-                            <span th:text="${errorMessage}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
-                        <form th:action="${customerId != null} ? @{/customers/{id}(id=${customerId})} : @{/customers}"
-                              th:object="${customerRequest}"
-                              method="post">
-                            
-                            <!-- ชื่อ-นามสกุล -->
-                            <div class="mb-3">
-                                <label for="name" class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="name" th:field="*{name}"
-                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
-                                    กรอกชื่อ-นามสกุล
-                                </div>
-                            </div>
-
-                            <!-- เลขประจำตัวประชาชน -->
-                            <div class="mb-3">
-                                <label for="citizenId" class="form-label">เลขประจำตัวประชาชน (13 หลัก) <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="citizenId" th:field="*{citizenId}" maxlength="13"
-                                       th:classappend="${#fields.hasErrors('citizenId')} ? 'is-invalid' : ''">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('citizenId')}" th:errors="*{citizenId}">
-                                    กรอกเลขประจำตัวประชาชน 13 หลัก
-                                </div>
-                            </div>
-
-                            <!-- เบอร์โทรศัพท์ -->
-                            <div class="mb-3">
-                                <label for="phoneNumber" class="form-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="phoneNumber" th:field="*{phoneNumber}"
-                                       th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}">
-                                    กรอกเบอร์โทรศัพท์
-                                </div>
-                            </div>
-
-                            <!-- ที่อยู่ -->
-                            <div class="mb-3">
-                                <label for="address" class="form-label">ที่อยู่</label>
-                                <textarea class="form-control" id="address" th:field="*{address}" rows="3"></textarea>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a th:href="@{/customers}" class="btn btn-secondary">ย้อนกลับ</a>
-                                <button type="submit" class="btn btn-success" th:text="${customerId != null ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'}">บันทึก</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">CUSTOMERS</span>
+            <h1 class="page-title" th:text="${customerId != null ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่'}">ฟอร์มข้อมูลลูกค้า</h1>
+            <p class="page-sub">กรอกข้อมูลให้ครบถ้วน ช่องที่มีเครื่องหมาย <span class="req">*</span> จำเป็นต้องกรอก</p>
         </div>
     </div>
+
+    <section class="card customer-form">
+        <div class="card-head">
+            <h2 th:text="${customerId != null ? 'ข้อมูลลูกค้า (แก้ไข)' : 'ข้อมูลลูกค้า (ใหม่)'}">ข้อมูลลูกค้า</h2>
+        </div>
+        <div class="card-body">
+
+            <!-- แจ้งเตือนข้อผิดพลาดจาก Service -->
+            <div th:if="${errorMessage}" class="alert alert-error" role="alert">
+                <span class="alert-body" th:text="${errorMessage}">เกิดข้อผิดพลาด</span>
+                <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+            </div>
+
+            <form th:action="${customerId != null} ? @{/customers/{id}(id=${customerId})} : @{/customers}"
+                  th:object="${customerForm}"
+                  method="post">
+
+                <div class="field">
+                    <label for="name">ชื่อ-นามสกุล <span class="req">*</span></label>
+                    <input type="text" class="control" id="name" th:field="*{name}"
+                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                    <small class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">กรอกชื่อ-นามสกุล</small>
+                </div>
+
+                <div class="field">
+                    <label for="citizenId">เลขประจำตัวประชาชน (13 หลัก) <span class="req">*</span></label>
+                    <input type="text" class="control" id="citizenId" th:field="*{citizenId}" maxlength="13"
+                           inputmode="numeric" th:classappend="${#fields.hasErrors('citizenId')} ? 'is-invalid'">
+                    <small class="field-error" th:if="${#fields.hasErrors('citizenId')}" th:errors="*{citizenId}">กรอกเลขประจำตัวประชาชน 13 หลัก</small>
+                </div>
+
+                <div class="field">
+                    <label for="phoneNumber">เบอร์โทรศัพท์ <span class="req">*</span></label>
+                    <input type="text" class="control" id="phoneNumber" th:field="*{phoneNumber}"
+                           inputmode="tel" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid'">
+                    <small class="field-error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}">กรอกเบอร์โทรศัพท์</small>
+                </div>
+
+                <div class="field">
+                    <label for="address">ที่อยู่</label>
+                    <textarea class="control" id="address" th:field="*{address}" rows="3"></textarea>
+                </div>
+
+                <section class="account-setup" th:if="${customerId == null}" aria-labelledby="account-setup-title">
+                    <label class="account-setup-toggle" for="createAccount">
+                        <input type="checkbox" id="createAccount" th:field="*{createAccount}">
+                        <span><strong id="account-setup-title">สร้างบัญชีเข้าสู่ระบบให้ลูกค้ารายนี้ด้วย</strong><small>ลูกค้าจะใช้บัญชีนี้เข้าสู่หน้าตั๋วจำนำของตนเอง</small></span>
+                    </label>
+                    <div class="account-setup-fields" id="accountSetupFields" th:classappend="${customerForm.createAccount} ? ' account-setup-open' : ''">
+                        <div class="account-fields-grid">
+                            <div class="field">
+                                <label for="username">ชื่อผู้ใช้ <span class="req">*</span></label>
+                                <input type="text" class="control" id="username" th:field="*{username}" minlength="3" maxlength="80" autocomplete="off" placeholder="อย่างน้อย 3 ตัวอักษร">
+                            </div>
+                            <div class="field">
+                                <label for="initialPassword">รหัสผ่านเริ่มต้น <span class="req">*</span></label>
+                                <input type="password" class="control" id="initialPassword" th:field="*{initialPassword}" minlength="12" autocomplete="new-password" placeholder="อย่างน้อย 12 ตัวอักษร">
+                            </div>
+                        </div>
+                        <small class="field-hint">ตั้งรหัสผ่านอย่างน้อย 12 ตัวอักษร แนะนำให้ใช้ภาษาอังกฤษและตัวเลข ลูกค้าสามารถเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบ</small>
+                    </div>
+                </section>
+
+                <div class="form-actions">
+                    <a th:href="@{/customers}" class="btn btn-outline">ย้อนกลับ</a>
+                    <button type="submit" class="btn btn-primary"
+                            th:text="${customerId != null ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'}">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</div>
 </body>
 </html>
