@@ -22,6 +22,13 @@ public class LedgerServiceImpl implements LedgerService {
     private final LedgerEntryRepository ledgerEntryRepository;
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean hasInterestPaymentOn(Long ticketId, LocalDate entryDate) {
+        return ledgerEntryRepository.existsByTicket_IdAndEntryTypeAndEntryDate(
+                ticketId, LedgerEntryType.INTEREST_PAYMENT, entryDate);
+    }
+
+    @Override
     @Transactional
     public LedgerEntry recordEntry(PawnTicket ticket, LedgerEntryType entryType, 
                                    Money principal, Money interest, Money total, 
