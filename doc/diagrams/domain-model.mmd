@@ -1,0 +1,64 @@
+classDiagram
+    direction LR
+    class Customer {
+        citizenId
+        ชื่อ-นามสกุล
+        blacklisted
+    }
+    class Employee {
+        employeeCode
+        active
+    }
+    class Role {
+        CASHIER / APPRAISER / MANAGER
+    }
+    class PledgedItem {
+        itemType : GOLD / ELECTRONICS / JEWELRY
+        description
+    }
+    class Appraisal {
+        appraisedValue : Money
+        maxLoanAmount : Money
+    }
+    class GoldPrice {
+        priceDate
+        pricePerGram : Money
+    }
+    class PawnTicket {
+        ticketNumber
+        principal : Money
+        dueDate
+        graceEndDate
+        status : TicketStatus
+    }
+    class InterestPolicy {
+        effectiveFrom
+        redemptionMonths
+        graceDays
+    }
+    class RateTier {
+        lowerBound / upperBound
+        monthlyRatePercent
+    }
+    class LedgerEntry {
+        entryType : PAWN / INTEREST_PAYMENT / REDEMPTION
+        totalAmount : Money
+    }
+    class SaleRecord {
+        soldPrice : Money
+    }
+    class NotificationLog {
+        channel
+        message
+    }
+    Customer "1" --> "0..*" PawnTicket : จำนำ
+    PawnTicket "1" --> "1" PledgedItem : ค้ำประกันด้วย
+    PledgedItem "1" --> "1" Appraisal : ผลประเมิน
+    Appraisal ..> GoldPrice : ใช้ราคาทอง
+    PawnTicket "0..*" --> "1" InterestPolicy : คิดดอกตาม
+    InterestPolicy "1" *-- "1..*" RateTier
+    PawnTicket "1" *-- "1..*" LedgerEntry : บันทึก
+    PawnTicket "1" --> "0..*" NotificationLog
+    PledgedItem "1" --> "0..1" SaleRecord : ขายเมื่อหลุด
+    Employee "0..*" --> "1..*" Role
+    Employee ..> PawnTicket : เปิดตั๋ว

@@ -1,0 +1,32 @@
+digraph UC {
+  rankdir=LR; graph [fontname="Loma", fontsize=14, pad=0.4, nodesep=0.35, ranksep=1.2, label="Use Case Diagram — ระบบจัดการโรงรับจำนำ", labelloc=t];
+  node [fontname="Loma", fontsize=13]; edge [arrowhead=none, color="#555555"];
+  cashier [label="พนักงานรับจำนำ\n(CASHIER)", shape=none, image="", width=0];
+  appraiser [label="ผู้ประเมินราคา\n(APPRAISER)", shape=none];
+  manager [label="ผู้จัดการ\n(MANAGER)", shape=none];
+  system [label="ระบบ\n(งานอัตโนมัติ)", shape=none];
+  subgraph cluster_sys { label="Pawnshop Management System"; style=rounded; color="#888888"; fontname="Loma";
+    node [shape=ellipse, style=filled, fillcolor="#f2f2f2", color="#666666"];
+    uc1 [label="UC-05 จัดการข้อมูลลูกค้า"];
+    uc2 [label="UC-01 ประเมินราคาทรัพย์"];
+    uc3 [label="UC-02 ออกตั๋วจำนำ"];
+    uc4 [label="UC-03 ต่อดอก"];
+    uc5 [label="UC-04 ไถ่ถอน"];
+    uc6 [label="UC-06 ดูยอดไถ่ถอน (quote)"];
+    uc7 [label="UC-07 อายัด / ปลดอายัดตั๋ว"];
+    uc8 [label="UC-08 ดูรายงานประจำวัน"];
+    uc9 [label="UC-09 บันทึกราคาทอง"];
+    uc10 [label="UC-10 เปลี่ยนสถานะตั๋วที่เลยกำหนด\n(GRACE / FORFEITED)"];
+    uc11 [label="UC-11 บันทึกการแจ้งเตือน"];
+    uc12 [label="ตรวจสิทธิ์ลูกค้า\n(blacklist)", fillcolor="#ffffff", style="dashed"];
+    uc13 [label="คิดดอกเบี้ยขั้นบันได", fillcolor="#ffffff", style="dashed"];
+    uc14 [label="บันทึกสมุดบัญชี", fillcolor="#ffffff", style="dashed"];
+  }
+  cashier -> uc1; cashier -> uc3; cashier -> uc4; cashier -> uc5; cashier -> uc6;
+  appraiser -> uc2;
+  manager -> uc7; manager -> uc8; manager -> uc9;
+  uc10 -> system [dir=back]; uc11 -> system [dir=back];
+  edge [style=dashed, arrowhead=vee, fontsize=10, fontname="Loma", label="«include»"];
+  uc3 -> uc12; uc4 -> uc13; uc5 -> uc13; uc3 -> uc14; uc4 -> uc14; uc5 -> uc14;
+  uc5 -> uc11 [label="«trigger»"]; uc10 -> uc11 [label="«trigger»"];
+}

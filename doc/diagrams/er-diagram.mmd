@@ -1,0 +1,112 @@
+erDiagram
+    customer ||--o{ pawn_ticket : "มีตั๋ว"
+    pledged_item ||--|| appraisal : "ประเมิน"
+    pledged_item ||--o| pawn_ticket : "ค้ำประกัน"
+    pledged_item ||--o| sale_record : "ขายเมื่อหลุด"
+    interest_policy ||--|{ rate_tier : "ขั้นอัตรา"
+    interest_policy ||--o{ pawn_ticket : "ใช้คิดดอก"
+    pawn_ticket ||--|{ ledger_entry : "รายการบัญชี"
+    pawn_ticket ||--o{ notification_log : "แจ้งเตือน"
+    employee ||--o{ employee_role : ""
+    role ||--o{ employee_role : ""
+    employee |o--o{ pawn_ticket : "เปิดตั๋ว"
+    employee |o--o{ gold_price : "บันทึกราคา"
+    customer {
+        bigint id PK
+        varchar citizen_id UK
+        varchar first_name
+        varchar last_name
+        varchar phone
+        boolean blacklisted
+    }
+    pledged_item {
+        bigint id PK
+        varchar item_type
+        varchar description
+        numeric weight_gram
+        numeric purity_percent
+        int manufacture_year
+        numeric reference_price
+        int condition_grade
+    }
+    appraisal {
+        bigint id PK
+        bigint pledged_item_id FK,UK
+        bigint appraiser_id FK
+        numeric appraised_value
+        numeric max_loan_amount
+        numeric gold_price_snapshot
+    }
+    gold_price {
+        bigint id PK
+        date price_date UK
+        numeric price_per_gram
+        bigint recorded_by FK
+    }
+    interest_policy {
+        bigint id PK
+        varchar code UK
+        date effective_from
+        date effective_to
+        int redemption_months
+        int grace_days
+    }
+    rate_tier {
+        bigint id PK
+        bigint policy_id FK
+        numeric lower_bound
+        numeric upper_bound
+        numeric monthly_rate_percent
+        int tier_order
+    }
+    pawn_ticket {
+        bigint id PK
+        varchar ticket_number UK
+        bigint customer_id FK
+        bigint pledged_item_id FK,UK
+        bigint interest_policy_id FK
+        bigint opened_by FK
+        numeric principal
+        date pawn_date
+        date due_date
+        date grace_end_date
+        date interest_paid_until
+        varchar status
+    }
+    ledger_entry {
+        bigint id PK
+        bigint ticket_id FK
+        varchar entry_type
+        numeric principal_amount
+        numeric interest_amount
+        numeric total_amount
+        date entry_date
+    }
+    sale_record {
+        bigint id PK
+        bigint pledged_item_id FK,UK
+        numeric sold_price
+        date sold_date
+    }
+    notification_log {
+        bigint id PK
+        bigint ticket_id FK
+        varchar channel
+        varchar status
+        varchar message
+    }
+    employee {
+        bigint id PK
+        varchar employee_code UK
+        varchar first_name
+        boolean active
+    }
+    role {
+        bigint id PK
+        varchar code UK
+        varchar name
+    }
+    employee_role {
+        bigint employee_id PK,FK
+        bigint role_id PK,FK
+    }

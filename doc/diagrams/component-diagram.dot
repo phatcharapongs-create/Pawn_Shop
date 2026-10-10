@@ -1,0 +1,24 @@
+digraph C {
+  rankdir=TB; graph [fontname="Loma", fontsize=14, pad=0.4, nodesep=0.5, ranksep=0.7, compound=true, label="Component Diagram — แบ่งตาม Slice และ interface ที่เรียกกัน", labelloc=t];
+  node [fontname="Loma", fontsize=12, shape=component, style=filled, fillcolor="#f2f2f2", color="#555555"];
+  edge [fontname="Loma", fontsize=10, color="#555555", arrowhead=vee];
+  web [label="Web UI (Thymeleaf)\n/pawn-tickets /customers /appraisals /reports", shape=box3d, fillcolor="#ffffff"];
+  api [label="REST API + Swagger\n/api/v1/**", shape=box3d, fillcolor="#ffffff"];
+  subgraph cluster_a { label="Slice A — ลูกค้าและพนักงาน"; style=rounded; color="#999999";
+    a [label="CustomerService\nEmployeeService"]; ex [label="GlobalExceptionHandler"]; }
+  subgraph cluster_b { label="Slice B — ทรัพย์และประเมินราคา"; style=rounded; color="#999999";
+    b [label="AppraisalService\nPledgedItemService"]; bs [label="AppraisalStrategy ×3\n(Strategy)"]; gp [label="GoldPriceProvider"]; }
+  subgraph cluster_c { label="Slice C — ตั๋วจำนำ"; style=rounded; color="#2b6cb0"; penwidth=2;
+    c [label="TicketOperationService\nTicketQueryService\nTicketAdminService", fillcolor="#e3eefb"]; cs [label="TicketState ×6\n(State)", fillcolor="#e3eefb"]; }
+  subgraph cluster_d { label="Slice D — บัญชีและดอกเบี้ย"; style=rounded; color="#999999";
+    d1 [label="InterestCalculator\n(Tiered)"]; d2 [label="LedgerService\nReportService"]; }
+  subgraph cluster_e { label="Slice E — แจ้งเตือนและ DevOps"; style=rounded; color="#999999";
+    e [label="NotificationListener\n(Observer)"]; }
+  db [label="PostgreSQL\n(Spring Data JPA + Flyway)", shape=cylinder, fillcolor="#ffffff"];
+  web -> a; web -> b; web -> c; web -> d2; api -> a; api -> b; api -> c; api -> d2;
+  c -> a [label="assertEligibleToPawn"]; c -> b [label="findByPledgedItemId"];
+  c -> d1 [label="accruedInterest"]; c -> d2 [label="recordEntry"]; c -> cs [label="stateOf"];
+  b -> bs; bs -> gp;
+  c -> e [label="publishEvent\n(TicketRedeemed/Forfeited)", style=dashed];
+  a -> db; b -> db; c -> db; d2 -> db; e -> db;
+}
