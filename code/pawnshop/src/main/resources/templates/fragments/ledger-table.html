@@ -28,7 +28,7 @@
       <tr th:each="e : ${entries}">
         <td th:text="${#temporals.format(e.entryDate, 'dd/MM/yyyy')}">01/01/2026</td>
 
-        <td th:if="${showTicket}" class="ticket" th:text="${e.ticket.ticketNumber}">T-0001</td>
+        <td th:if="${showTicket}" class="ticket-cell" th:text="${e.ticket.ticketNumber}">T-0001</td>
 
         <td th:switch="${e.entryType.name()}">
           <span th:case="'PAWN'" class="tag pawn">จำนำ</span>
