@@ -24,7 +24,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Employee> getActiveEmployees() { // หากใน Interface ใช้ชื่อ findActive() สามารถเปลี่ยนชื่อเมธอดตรงนี้ให้ตรงกันได้ครับ
+    public List<Employee> getActiveEmployees() {
         return employeeRepository.findByActiveTrue();
     }
 
@@ -47,7 +47,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee existing = findById(id);
         existing.setFirstName(employee.getFirstName());
         existing.setLastName(employee.getLastName());
-        existing.setPhone(employee.getPhone());
         existing.setActive(employee.isActive());
         return employeeRepository.save(existing);
     }
