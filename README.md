@@ -211,7 +211,7 @@ cd code
  
 ## Deployment URL
  
-_(รอ deploy — ต้องใช้งานได้จริง ณ วันนำเสนอ)_
+(https://pawn-shop-fg3j.onrender.com/customers;jsessionid=28F25CE76C437B6096487308648D3C59)
  
 ---
  
