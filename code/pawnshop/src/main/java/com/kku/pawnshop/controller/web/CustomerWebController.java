@@ -26,7 +26,7 @@ public class CustomerWebController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
-        Page<CustomerResponse> customerPage = customerService.getAllCustomers(PageRequest.of(page, size));
+        Page<CustomerResponse> customerPage = customerService.findAllResponses(PageRequest.of(page, size));
         model.addAttribute("customers", customerPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", customerPage.getTotalPages());
@@ -49,7 +49,7 @@ public class CustomerWebController {
             return "customers/form";
         }
         try {
-            customerService.createCustomer(request);
+            customerService.create(request);
             redirectAttributes.addFlashAttribute("successMessage", "บันทึกข้อมูลลูกค้าสำเร็จ");
             return "redirect:/customers";
         } catch (ResponseStatusException e) {
@@ -63,7 +63,7 @@ public class CustomerWebController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        CustomerResponse customer = customerService.getCustomerById(id);
+        CustomerResponse customer = customerService.findResponseById(id);
         CustomerRequest request = new CustomerRequest(
                 customer.getName(),
                 customer.getCitizenId(),
@@ -87,7 +87,7 @@ public class CustomerWebController {
             return "customers/form";
         }
         try {
-            customerService.updateCustomer(id, request);
+            customerService.update(id, request);
             redirectAttributes.addFlashAttribute("successMessage", "แก้ไขข้อมูลลูกค้าสำเร็จ");
             return "redirect:/customers";
         } catch (ResponseStatusException e) {
@@ -104,7 +104,7 @@ public class CustomerWebController {
     @PostMapping("/{id}/delete")
     public String deleteCustomer(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            customerService.deleteCustomer(id);
+            customerService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage", "ลบข้อมูลลูกค้าสำเร็จ");
         } catch (ResponseStatusException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getReason());
