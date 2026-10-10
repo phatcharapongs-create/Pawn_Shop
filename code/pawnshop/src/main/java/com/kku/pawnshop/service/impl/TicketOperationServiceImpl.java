@@ -142,6 +142,12 @@ public class TicketOperationServiceImpl implements TicketOperationService {
             throw new InvalidTicketOperationException(ticket.getTicketNumber(), ticket.getStatus(), "ต่อดอก");
         }
 
+        // ป้องกันการส่งฟอร์มซ้ำ: การต่อดอกหนึ่งครั้งต่อตั๋วต่อวันเท่านั้น
+        if (ledgerService.hasInterestPaymentOn(ticketId, LocalDate.now())) {
+            throw new BusinessRuleViolationException(
+                    "ตั๋วเลขที่ " + ticket.getTicketNumber() + " มีรายการชำระดอกเบี้ยในวันนี้แล้ว ไม่สามารถบันทึกซ้ำได้");
+        }
+
         Money interest = interestCalculator.accruedInterest(ticket, paymentDate);
         ledgerService.recordEntry(ticket, LedgerEntryType.INTEREST_PAYMENT,
                 Money.zero(), interest, interest,

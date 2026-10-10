@@ -1,7 +1,8 @@
 package com.kku.pawnshop.controller.web;
 
-import com.kku.pawnshop.dto.request.CustomerRequest;
+import com.kku.pawnshop.dto.request.CustomerRegistrationForm;
 import com.kku.pawnshop.dto.response.CustomerResponse;
+import com.kku.pawnshop.service.CustomerOnboardingService;
 import com.kku.pawnshop.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CustomerWebController {
 
     private final CustomerService customerService;
+    private final CustomerOnboardingService customerOnboardingService;
 
     @GetMapping
     public String listCustomers(
@@ -35,13 +37,13 @@ public class CustomerWebController {
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("customerRequest", new CustomerRequest());
+        model.addAttribute("customerForm", new CustomerRegistrationForm());
         return "customers/form";
     }
 
     @PostMapping
     public String createCustomer(
-            @Valid @ModelAttribute("customerRequest") CustomerRequest request,
+            @Valid @ModelAttribute("customerForm") CustomerRegistrationForm request,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
@@ -49,8 +51,10 @@ public class CustomerWebController {
             return "customers/form";
         }
         try {
-            customerService.create(request);
-            redirectAttributes.addFlashAttribute("successMessage", "บันทึกข้อมูลลูกค้าสำเร็จ");
+            customerOnboardingService.register(request, request.isCreateAccount(), request.getUsername(), request.getInitialPassword());
+            redirectAttributes.addFlashAttribute("successMessage", request.isCreateAccount()
+                    ? "บันทึกข้อมูลลูกค้าและสร้างบัญชีเข้าสู่ระบบเรียบร้อย"
+                    : "บันทึกข้อมูลลูกค้าสำเร็จ");
             return "redirect:/customers";
         } catch (ResponseStatusException e) {
             model.addAttribute("errorMessage", e.getReason());
@@ -64,13 +68,12 @@ public class CustomerWebController {
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
         CustomerResponse customer = customerService.findResponseById(id);
-        CustomerRequest request = new CustomerRequest(
-                customer.getName(),
-                customer.getCitizenId(),
-                customer.getPhoneNumber(),
-                customer.getAddress()
-        );
-        model.addAttribute("customerRequest", request);
+        CustomerRegistrationForm request = new CustomerRegistrationForm();
+        request.setName(customer.getName());
+        request.setCitizenId(customer.getCitizenId());
+        request.setPhoneNumber(customer.getPhoneNumber());
+        request.setAddress(customer.getAddress());
+        model.addAttribute("customerForm", request);
         model.addAttribute("customerId", id);
         return "customers/form";
     }
@@ -78,7 +81,7 @@ public class CustomerWebController {
     @PostMapping("/{id}")
     public String updateCustomer(
             @PathVariable Long id,
-            @Valid @ModelAttribute("customerRequest") CustomerRequest request,
+            @Valid @ModelAttribute("customerForm") CustomerRegistrationForm request,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
