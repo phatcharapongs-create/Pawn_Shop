@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="${customerId != null ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่'}">จัดการข้อมูลลูกค้า</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0" th:text="${customerId != null ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่'}">ฟอร์มข้อมูลลูกค้า</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- แจ้งเตือนข้อผิดพลาดจาก Service -->
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                            <span th:text="${errorMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="${customerId != null} ? @{/customers/{id}(id=${customerId})} : @{/customers}"
+                              th:object="${customerRequest}"
+                              method="post">
+                            
+                            <!-- ชื่อ-นามสกุล -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                                    กรอกชื่อ-นามสกุล
+                                </div>
+                            </div>
+
+                            <!-- เลขประจำตัวประชาชน -->
+                            <div class="mb-3">
+                                <label for="citizenId" class="form-label">เลขประจำตัวประชาชน (13 หลัก) <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="citizenId" th:field="*{citizenId}" maxlength="13"
+                                       th:classappend="${#fields.hasErrors('citizenId')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('citizenId')}" th:errors="*{citizenId}">
+                                    กรอกเลขประจำตัวประชาชน 13 หลัก
+                                </div>
+                            </div>
+
+                            <!-- เบอร์โทรศัพท์ -->
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="phoneNumber" th:field="*{phoneNumber}"
+                                       th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}">
+                                    กรอกเบอร์โทรศัพท์
+                                </div>
+                            </div>
+
+                            <!-- ที่อยู่ -->
+                            <div class="mb-3">
+                                <label for="address" class="form-label">ที่อยู่</label>
+                                <textarea class="form-control" id="address" th:field="*{address}" rows="3"></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a th:href="@{/customers}" class="btn btn-secondary">ย้อนกลับ</a>
+                                <button type="submit" class="btn btn-success" th:text="${customerId != null ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'}">บันทึก</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

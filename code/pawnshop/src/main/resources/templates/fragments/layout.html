@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Pawnshop Management System">Pawnshop System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navbar ครบ 8 เมนูตามข้อกำหนด -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/customers}">Pawnshop System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/pawn-tickets/new}">ออกตั๋วจำนำ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/pawn-tickets}">รายการตั๋ว</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/customers}">จัดการลูกค้า</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/appraisals/new}">ประเมินราคา</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/gold-prices}">ราคาทอง</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/forfeited-items}">ทรัพย์หลุดจำนำ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/reports/daily}">รายงานประจำวัน</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/notifications}">การแจ้งเตือน</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="container">
+        <div layout:fragment="content">
+            <!-- เนื้อหาของแต่ละหน้าจะมาแทรกตรงนี้ -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
