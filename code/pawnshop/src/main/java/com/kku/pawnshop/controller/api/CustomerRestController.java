@@ -24,19 +24,19 @@ public class CustomerRestController {
     @GetMapping
     public ResponseEntity<Page<CustomerResponse>> getAllCustomers(
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(customerService.getAllCustomers(pageable));
+        return ResponseEntity.ok(customerService.findAllResponses(pageable));
     }
 
     // 2. GET - ดึงข้อมูลลูกค้าตาม ID
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
-        return ResponseEntity.ok(customerService.getCustomerById(id));
+        return ResponseEntity.ok(customerService.findResponseById(id));
     }
 
     // 3. POST - เพิ่มข้อมูลลูกค้าใหม่
     @PostMapping
     public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CustomerRequest request) {
-        CustomerResponse createdCustomer = customerService.createCustomer(request);
+        CustomerResponse createdCustomer = customerService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
     }
 
@@ -45,13 +45,13 @@ public class CustomerRestController {
     public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable Long id,
             @Valid @RequestBody CustomerRequest request) {
-        return ResponseEntity.ok(customerService.updateCustomer(id, request));
+        return ResponseEntity.ok(customerService.update(id, request));
     }
 
     // 5. DELETE - ลบข้อมูลลูกค้า
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-        customerService.deleteCustomer(id);
+        customerService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
