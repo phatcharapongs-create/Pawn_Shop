@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head><title>ภาพรวมผู้ดูแลระบบ</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body><div layout:fragment="content" class="admin-dashboard">
+    <div class="admin-welcome">
+        <div><span class="eyebrow">ADMINISTRATION</span><h1>ภาพรวมผู้ดูแลระบบ</h1><p>จัดการงานโรงรับจำนำและติดตามสถานะสำคัญในหน้าเดียว</p></div>
+        <div class="admin-date"><span>วันที่ปัจจุบัน</span><strong th:text="${#temporals.format(today, 'dd MMMM yyyy')}">10 ตุลาคม 2026</strong></div>
+    </div>
+    <div class="alert alert-success" role="status" th:if="${jobMessage}"><span class="alert-body" th:text="${jobMessage}">อัปเดตเรียบร้อย</span><button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button></div>
+
+    <section class="admin-block" aria-labelledby="ticket-summary-title">
+        <div class="admin-block-heading"><div><span class="eyebrow">LIVE SUMMARY</span><h2 id="ticket-summary-title">สรุปรายการจำนำ</h2></div><a class="admin-text-link" th:href="@{/pawn-tickets}">ดูตั๋วทั้งหมด <span aria-hidden="true">→</span></a></div>
+        <dl class="admin-stats">
+            <div class="stat-card stat-highlight"><dt>บุคลากร</dt><div class="stat-pair"><div><dd th:text="${dashboard.customerCount}">0</dd><span>ลูกค้า</span></div><div><dd th:text="${dashboard.employeeCount}">0</dd><span>พนักงาน</span></div></div></div>
+            <div class="stat-card"><dt>กำลังดำเนินการ</dt><div class="stat-pair"><div><dd th:text="${dashboard.activeTickets}">0</dd><span>ตั๋วใช้งาน</span></div><div><dd th:text="${dashboard.graceTickets}">0</dd><span>ช่วงผ่อนผัน</span></div></div></div>
+            <div class="stat-card"><dt>ทรัพย์หลุดจำนำ</dt><div class="stat-pair"><div><dd th:text="${dashboard.forfeitedTickets}">0</dd><span>รอจัดการ</span></div><div><dd th:text="${dashboard.soldTickets}">0</dd><span>จำหน่ายแล้ว</span></div></div></div>
+            <div class="stat-card"><dt>ปิดรายการ</dt><div class="stat-pair"><div><dd th:text="${dashboard.redeemedTickets}">0</dd><span>ไถ่ถอนแล้ว</span></div><div><dd th:text="${dashboard.seizedTickets}">0</dd><span>ถูกอายัด</span></div></div></div>
+        </dl>
+    </section>
+
+    <section class="admin-block" aria-labelledby="work-tools-title">
+        <div class="admin-block-heading"><div><span class="eyebrow">WORKSPACE</span><h2 id="work-tools-title">เมนูจัดการ</h2></div></div>
+        <div class="admin-links">
+            <a class="admin-link" th:href="@{/pawn-tickets/new}"><span class="admin-link-icon">＋</span><strong>ออกตั๋วจำนำ</strong><span>สร้างรายการจำนำใหม่</span></a>
+            <a class="admin-link" th:href="@{/pawn-tickets}"><span class="admin-link-icon">▤</span><strong>รายการตั๋ว</strong><span>ค้นหาและติดตามตั๋ว</span></a>
+            <a class="admin-link" th:href="@{/appraisals/new}"><span class="admin-link-icon">◇</span><strong>ประเมินราคา</strong><span>ประเมินทรัพย์ก่อนจำนำ</span></a>
+            <a class="admin-link" th:href="@{/appraisals}"><span class="admin-link-icon">▤</span><strong>ประวัติผลประเมิน</strong><span>เรียกดูผลประเมินที่บันทึกไว้</span></a>
+            <a class="admin-link" th:href="@{/customers}"><span class="admin-link-icon">♙</span><strong>จัดการลูกค้า</strong><span>ดูและแก้ไขข้อมูลลูกค้า</span></a>
+            <a class="admin-link" th:href="@{/admin/accounts}"><span class="admin-link-icon">⚿</span><strong>บัญชีลูกค้า</strong><span>สร้างบัญชีเข้าสู่ระบบ</span></a>
+            <a class="admin-link" th:href="@{/gold-prices}"><span class="admin-link-icon">฿</span><strong>ราคาทอง</strong><span>บันทึกและดูประวัติราคา</span></a>
+            <a class="admin-link" th:href="@{/forfeited-items}"><span class="admin-link-icon">◇</span><strong>ทรัพย์หลุดจำนำ</strong><span>ตรวจรายการและบันทึกการขาย</span></a>
+            <a class="admin-link" th:href="@{/reports/daily}"><span class="admin-link-icon">▥</span><strong>รายงานประจำวัน</strong><span>ตรวจสอบยอดธุรกรรม</span></a>
+        </div>
+    </section>
+
+    <div class="admin-bottom-grid">
+        <section class="admin-panel"><div class="admin-block-heading"><div><span class="eyebrow">FOLLOW UP</span><h2>งานที่ต้องติดตาม</h2></div></div>
+            <a class="admin-reminder" th:href="@{/forfeited-items(status='FORFEITED')}"><span><strong>ทรัพย์รอจำหน่าย</strong><small>รายการที่พ้นช่วงผ่อนผันแล้ว</small></span><b th:text="${dashboard.forfeitedTickets}">0</b></a>
+            <a class="admin-reminder" th:href="@{/forfeited-items(status='SOLD')}"><span><strong>จำหน่ายแล้ว</strong><small>ดูประวัติการขายทรัพย์หลุดจำนำ</small></span><b th:text="${dashboard.soldTickets}">0</b></a>
+            <a class="admin-reminder" th:href="@{/gold-prices}"><span><strong>วันที่บันทึกราคาทองล่าสุด</strong><small>ข้อมูลราคาทองในระบบ</small></span><b class="date-value" th:text="${dashboard.latestGoldPriceDate != null ? #temporals.format(dashboard.latestGoldPriceDate, 'dd/MM/yyyy') : 'ยังไม่มีข้อมูล'}">ยังไม่มีข้อมูล</b></a>
+        </section>
+        <section class="admin-panel admin-job"><div class="admin-block-heading"><div><span class="eyebrow">DAILY MAINTENANCE</span><h2>ประมวลผลสถานะ</h2></div></div>
+            <p>ตรวจวันครบกำหนดและปรับสถานะตั๋วตามวันที่ปัจจุบัน รวมถึงรายการที่พ้นช่วงผ่อนผัน</p>
+            <form method="post" th:action="@{/admin/run-daily-jobs}"
+                  data-confirm-title="ประมวลผลสถานะประจำวัน"
+                  data-confirm-eyebrow="DAILY MAINTENANCE"
+                  data-confirm-icon="↻"
+                  data-confirm-accept="เริ่มประมวลผล"
+                  data-confirm-theme="maintenance"
+                  data-confirm-message="ระบบจะตรวจวันครบกำหนดและปรับสถานะตั๋วทั้งหมดตามวันที่ปัจจุบัน ต้องการดำเนินการต่อหรือไม่?"
+                  data-confirm-note="รายการที่ประมวลผลแล้วจะไม่ถูกเปลี่ยนสถานะซ้ำ">
+                <button class="btn btn-primary" type="submit">ประมวลผลสถานะประจำวัน</button>
+            </form>
+            <small class="field-hint">ทำซ้ำได้ ระบบจะไม่เปลี่ยนสถานะรายการที่ประมวลผลแล้ว</small>
+        </section>
+    </div>
+</div></body></html>

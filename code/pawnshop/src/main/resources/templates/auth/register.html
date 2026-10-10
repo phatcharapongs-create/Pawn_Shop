@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head><title>สมัครสมาชิก</title><link rel="stylesheet" th:href="@{/css/auth.css}"></head>
+<body><div layout:fragment="content">
+    <section class="card auth-card signup-card">
+        <div class="card-head"><h1>สมัครสมาชิก</h1></div>
+        <div class="card-body">
+            <p class="page-sub">สมัครบัญชีลูกค้าเพื่อดูตั๋วจำนำและสินค้าพร้อมจำหน่าย</p>
+            <div class="alert alert-error" role="alert" th:if="${errorMessage}"><span class="alert-body" th:text="${errorMessage}">เกิดข้อผิดพลาด</span></div>
+            <form th:action="@{/register}" th:object="${signupForm}" method="post">
+                <div class="field"><label for="name">ชื่อ-นามสกุล <span class="req">*</span></label><input class="control" id="name" th:field="*{name}" autocomplete="name" required><small class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></small></div>
+                <div class="field"><label for="citizenId">เลขประจำตัวประชาชน (13 หลัก) <span class="req">*</span></label><input class="control" id="citizenId" th:field="*{citizenId}" inputmode="numeric" maxlength="13" autocomplete="off" required><small class="field-error" th:if="${#fields.hasErrors('citizenId')}" th:errors="*{citizenId}"></small></div>
+                <div class="field"><label for="phoneNumber">เบอร์โทรศัพท์ <span class="req">*</span></label><input class="control" id="phoneNumber" th:field="*{phoneNumber}" inputmode="tel" autocomplete="tel" required><small class="field-error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></small></div>
+                <div class="field"><label for="address">ที่อยู่</label><textarea class="control" id="address" th:field="*{address}" rows="2" autocomplete="street-address"></textarea></div>
+                <div class="signup-divider"><span>ข้อมูลเข้าสู่ระบบ</span></div>
+                <div class="field"><label for="username">ชื่อผู้ใช้ <span class="req">*</span></label><input class="control" id="username" th:field="*{username}" minlength="3" maxlength="80" autocomplete="username" required><small class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small></div>
+                <div class="field"><label for="password">รหัสผ่าน (อย่างน้อย 12 ตัวอักษร) <span class="req">*</span></label><input class="control" id="password" th:field="*{password}" type="password" minlength="12" autocomplete="new-password" required><small class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small><small class="field-hint">แนะนำให้ใช้ภาษาอังกฤษและตัวเลข</small></div>
+                <div class="field"><label for="confirmPassword">ยืนยันรหัสผ่าน <span class="req">*</span></label><input class="control" id="confirmPassword" th:field="*{confirmPassword}" type="password" minlength="12" autocomplete="new-password" required><small class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></small></div>
+                <div class="signup-actions"><a class="btn btn-outline" th:href="@{/login}">กลับเข้าสู่ระบบ</a><button class="btn btn-primary" type="submit">สมัครสมาชิก</button></div>
+            </form>
+        </div>
+    </section>
+</div></body></html>

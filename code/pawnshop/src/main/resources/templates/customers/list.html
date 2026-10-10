@@ -1,78 +1,90 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="th"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout}">
 <head>
     <title>รายการลูกค้า</title>
+    <link rel="stylesheet" th:href="@{/css/customer.css}">
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>รายการลูกค้าทั้งหมด</h2>
+<div layout:fragment="content">
+
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">CUSTOMERS</span>
+            <h1 class="page-title">รายการลูกค้าทั้งหมด</h1>
+            <p class="page-sub">ข้อมูลลูกค้าที่ลงทะเบียนไว้ในระบบ</p>
+        </div>
+        <div class="page-actions">
             <a th:href="@{/customers/new}" class="btn btn-primary">+ เพิ่มลูกค้าใหม่</a>
         </div>
+    </div>
 
-        <!-- แจ้งเตือนสำเร็จ -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${successMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <!-- แจ้งเตือนสำเร็จ -->
+    <div th:if="${successMessage}" class="alert alert-success" role="status">
+        <span class="alert-body" th:text="${successMessage}">บันทึกข้อมูลเรียบร้อย</span>
+        <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+    </div>
 
-        <!-- แจ้งเตือนข้อผิดพลาด -->
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${errorMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <!-- แจ้งเตือนข้อผิดพลาด -->
+    <div th:if="${errorMessage}" class="alert alert-error" role="alert">
+        <span class="alert-body" th:text="${errorMessage}">เกิดข้อผิดพลาด</span>
+        <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+    </div>
 
-        <table class="table table-striped table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>ชื่อ-นามสกุล</th>
-                    <th>เลขบัตรประชาชน</th>
-                    <th>เบอร์โทรศัพท์</th>
-                    <th>ที่อยู่</th>
-                    <th class="text-center">จัดการ</th>
-                </tr>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>เลขบัตรประชาชน</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>ที่อยู่</th>
+                <th class="center">จัดการ</th>
+            </tr>
             </thead>
             <tbody>
-                <tr th:each="customer : ${customers}">
-                    <td th:text="${customer.id}">1</td>
-                    <td th:text="${customer.name}">ชื่อ พิกัด</td>
-                    <td th:text="${customer.citizenId}">1234567890123</td>
-                    <td th:text="${customer.phoneNumber}">0812345678</td>
-                    <td th:text="${customer.address}">ขอนแก่น</td>
-                    <td class="text-center">
-                        <a th:href="@{/customers/{id}/edit(id=${customer.id})}" class="btn btn-sm btn-warning me-1">แก้ไข</a>
-                        <form th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post" class="d-inline"
+            <tr th:each="customer : ${customers}">
+                <td><span class="customer-id" th:text="${customer.id}">1</span></td>
+                <td class="customer-name" th:text="${customer.name}">ชื่อ นามสกุล</td>
+                <td class="citizen-id" th:text="${customer.citizenId}">1234567890123</td>
+                <td th:text="${customer.phoneNumber}">0812345678</td>
+                <td class="cell-address" th:text="${customer.address}">ขอนแก่น</td>
+                <td>
+                    <div class="actions">
+                        <a th:href="@{/customers/{id}/edit(id=${customer.id})}" class="btn btn-outline btn-sm">แก้ไข</a>
+                        <form th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
                               onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบลูกค้ารายนี้?');">
-                            <button type="submit" class="btn btn-sm btn-danger">ลบ</button>
+                            <button type="submit" class="btn btn-danger-outline btn-sm">ลบ</button>
                         </form>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(customers)}">
-                    <td colspan="6" class="text-center text-muted">ไม่พบข้อมูลลูกค้าในระบบ</td>
-                </tr>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(customers)}">
+                <td colspan="6" class="empty">ไม่พบข้อมูลลูกค้าในระบบ</td>
+            </tr>
             </tbody>
         </table>
-
-        <!-- ปุ่มเปลี่ยนหน้า Pagination -->
-        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
-            <nav>
-                <ul class="pagination">
-                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/customers(page=${currentPage - 1})}">ก่อนหน้า</a>
-                    </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" th:href="@{/customers(page=${i})}" th:text="${i + 1}">1</a>
-                    </li>
-                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/customers(page=${currentPage + 1})}">ถัดไป</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
     </div>
+
+    <!-- เปลี่ยนหน้า -->
+    <nav th:if="${totalPages > 1}" aria-label="เปลี่ยนหน้า">
+        <ul class="pagination">
+            <li th:classappend="${currentPage == 0} ? 'disabled'">
+                <a th:href="@{/customers(page=${currentPage - 1})}">ก่อนหน้า</a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a th:href="@{/customers(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a th:href="@{/customers(page=${currentPage + 1})}">ถัดไป</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
 </body>
 </html>

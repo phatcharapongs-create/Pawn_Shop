@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head><title>เข้าสู่ระบบ</title><link rel="stylesheet" th:href="@{/css/auth.css}"></head>
+<body><div layout:fragment="content">
+    <section class="card auth-card"><div class="card-head"><h1>เข้าสู่ระบบ</h1></div><div class="card-body">
+        <p class="page-sub">เข้าสู่ระบบสำหรับลูกค้าหรือผู้ดูแลระบบ</p>
+        <div class="alert alert-error" role="alert" th:if="${loginError}"><span class="alert-body">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือบัญชีถูกปิดใช้งาน</span></div>
+        <div class="alert alert-success" role="status" th:if="${loggedOut}"><span class="alert-body">ออกจากระบบเรียบร้อยแล้ว</span></div>
+        <div class="alert alert-success" role="status" th:if="${param.registered}"><span class="alert-body">สมัครสมาชิกเรียบร้อยแล้ว กรุณาเข้าสู่ระบบ</span></div>
+        <div class="alert alert-error" role="alert" th:if="${param.accountMissing}">
+            <span class="alert-body">session นี้ไม่พบบัญชีในฐานข้อมูลปัจจุบัน กรุณาออกจากระบบแล้วเข้าสู่ระบบอีกครั้งด้วยชื่อผู้ใช้ที่สมัครไว้</span>
+            <form th:action="@{/logout}" method="post"><button class="btn btn-outline btn-sm" type="submit">ออกจากระบบ</button></form>
+        </div>
+        <form th:action="@{/login}" method="post">
+            <div class="field"><label for="username">ชื่อผู้ใช้</label><input class="control" id="username" name="username" type="text" autocomplete="username" required autofocus></div>
+            <div class="field"><label for="password">รหัสผ่าน</label><input class="control" id="password" name="password" type="password" autocomplete="current-password" required></div>
+            <button class="btn btn-primary btn-block" type="submit">เข้าสู่ระบบ</button>
+        </form>
+        <p class="signup-prompt">ยังไม่มีบัญชีลูกค้า? <a th:href="@{/register}">สมัครสมาชิก</a></p>
+    </div></section>
+</div></body></html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head><title>บัญชีลูกค้า</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body><div layout:fragment="content">
+    <div class="page-head"><div><span class="eyebrow">CUSTOMER ACCOUNTS</span><h1 class="page-title">จัดการบัญชีลูกค้า</h1><p class="page-sub">สร้างบัญชีเข้าสู่ระบบให้ลูกค้าที่ลงทะเบียนในระบบแล้ว</p></div></div>
+    <div class="alert alert-success" role="status" th:if="${successMessage}"><span class="alert-body" th:text="${successMessage}"></span></div>
+    <div class="alert alert-error" role="alert" th:if="${errorMessage}"><span class="alert-body" th:text="${errorMessage}"></span></div>
+    <section class="card"><div class="card-head"><h2>สร้างบัญชีลูกค้า</h2></div><div class="card-body">
+        <form method="post" th:action="@{/admin/accounts}" class="form-grid">
+            <div class="field span-2"><label for="customerId">เลือกลูกค้า</label><select class="control" id="customerId" name="customerId" required><option value="">เลือกลูกค้าที่ลงทะเบียนแล้ว</option><option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.name + ' · ' + customer.citizenId}"></option></select></div>
+            <div class="field"><label for="username">ชื่อผู้ใช้</label><input class="control" id="username" name="username" minlength="3" maxlength="80" required autocomplete="off"></div>
+            <div class="field"><label for="password">รหัสผ่านเริ่มต้น (อย่างน้อย 12 ตัวอักษร)</label><input class="control" id="password" name="password" type="password" minlength="12" required autocomplete="new-password"></div>
+            <div class="form-actions span-2"><span class="field-hint">ลูกค้าสามารถเปลี่ยนรหัสผ่านได้หลังเข้าสู่ระบบ</span><button class="btn btn-primary" type="submit">สร้างบัญชี</button></div>
+        </form>
+    </div></section>
+    <h2 class="section-title admin-section">บัญชีลูกค้าที่สร้างแล้ว</h2>
+    <div class="table-wrap"><table class="table"><thead><tr><th>ชื่อผู้ใช้</th><th>ลูกค้า</th><th>สถานะบัญชี</th></tr></thead><tbody>
+        <tr th:each="account : ${accounts}"><td th:text="${account.username}">username</td><td th:text="${account.customerName}">ชื่อลูกค้า</td><td th:text="${account.enabled ? 'ใช้งาน' : 'ปิดใช้งาน'}">ใช้งาน</td></tr>
+        <tr th:if="${#lists.isEmpty(accounts)}"><td colspan="3" class="empty">ยังไม่มีบัญชีลูกค้า</td></tr>
+    </tbody></table></div>
+</div></body></html>
