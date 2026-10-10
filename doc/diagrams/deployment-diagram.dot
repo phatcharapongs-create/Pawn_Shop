@@ -1,0 +1,17 @@
+digraph D {
+  rankdir=LR; graph [fontname="Loma", fontsize=14, pad=0.4, nodesep=0.6, ranksep=1.0, label="Deployment Diagram", labelloc=t];
+  node [fontname="Loma", fontsize=12, shape=box3d, style=filled, fillcolor="#f7f7f7", color="#555555"];
+  edge [fontname="Loma", fontsize=11, color="#555555"];
+  client [label="«device»\nเครื่องผู้ใช้\nWeb Browser"];
+  subgraph cluster_render { label="«cloud» Render (Web Service)"; style=rounded; color="#2b6cb0"; fontname="Loma";
+    subgraph cluster_docker { label="«container» Docker (eclipse-temurin:17-jre)"; style=dashed; color="#777777";
+      app [label="«artifact»\npawnshop.jar\nSpring Boot 4.1.1\nThymeleaf + REST + Swagger", shape=component, fillcolor="#e3eefb"]; }
+    env [label="Environment Variables\nDB_URL, DB_USERNAME,\nDB_PASSWORD, JAVA_OPTS, PORT", shape=note, fillcolor="#ffffff"]; }
+  subgraph cluster_db { label="«cloud» Managed PostgreSQL (Neon / Supabase)"; style=rounded; color="#2b6cb0"; fontname="Loma";
+    db [label="«database»\nPostgreSQL\n13 ตาราง (Flyway)", shape=cylinder, fillcolor="#ffffff"]; }
+  gh [label="GitHub\nPawn_Shop (develop/main)", shape=folder, fillcolor="#ffffff"];
+  client -> app [label="HTTPS"];
+  app -> db [label="JDBC (TLS)"];
+  env -> app [style=dashed, arrowhead=none];
+  gh -> app [label="build จาก Dockerfile", style=dashed];
+}

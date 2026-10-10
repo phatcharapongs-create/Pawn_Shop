@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Appraisal pages — form / result
+   ========================================================================== */
+
+.appraisal-page { max-width: 900px; }
+
+.appraisal-form, .appraisal-result {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+.appraisal-section { padding: 1.5rem 1.75rem 1.75rem; border-bottom: 1px solid var(--line); }
+.appraisal-section .section-title { margin-bottom: .35rem; }
+.section-help { margin: 0 0 1.1rem; color: var(--gray); font-size: .9rem; }
+.appraisal-section .form-grid { margin-top: 1.1rem; }
+.section-help + .form-grid { margin-top: 0; }
+
+.appraisal-actions { display: flex; justify-content: flex-end; gap: .75rem; padding: 1.25rem 1.75rem; background: var(--mist); border-radius: 0 0 var(--radius) var(--radius); }
+.appraisal-result + .appraisal-actions { padding: 1.25rem 0 0; background: none; }
+
+/* ---------- ผลประเมิน ---------- */
+.appraisal-result { padding: 1.75rem; border-top: 5px solid var(--gold); }
+.result-heading {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.1rem; border-bottom: 1px dashed var(--silver);
+}
+.result-label { margin: 0 0 .2rem; color: var(--gray); font-size: .85rem; }
+.result-heading h3 { font-size: 1.3rem; }
+.result-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1.1rem 0 1.5rem; }
+.result-details div { min-width: 0; }
+.result-details dt { color: var(--gray); font-size: .85rem; }
+.result-details dd { margin: .15rem 0 0; font-weight: 600; overflow-wrap: anywhere; }
+
+.result-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: var(--radius); overflow: hidden; border: 2px solid var(--black); }
+.result-value { display: flex; flex-direction: column; justify-content: center; gap: .3rem; min-height: 130px; padding: 1.25rem 1.5rem; }
+.result-value span   { color: var(--gray); font-size: .9rem; }
+.result-value strong { font: 700 clamp(1.4rem, 3.4vw, 2rem)/1.15 var(--font-head); font-variant-numeric: tabular-nums; }
+.result-value-primary { background: var(--gold); }
+.result-value-primary span { color: var(--black); font-weight: 600; }
+.gold-snapshot { margin: 1.1rem 0 0; color: var(--gray); }
+.gold-snapshot strong { color: var(--black); }
+.appraisal-history-page { max-width:1200px; }
+.appraisal-history-table { min-width:900px; }
+.appraisal-history-table td strong,.history-serial { display:block; }
+.history-serial { margin-top:.15rem; color:var(--gray); font-size:.82rem; }
+.btn-small { min-height:2.2rem; padding:.4rem .8rem; font-size:.88rem; white-space:nowrap; }
+.history-pagination { display:flex; align-items:center; justify-content:center; gap:1rem; padding:1rem; color:var(--gray); }
+.appraisal-history-page > .card { overflow:hidden; }
+
+@media (max-width: 650px) {
+  .appraisal-section { padding: 1.25rem; }
+  .result-details, .result-values { grid-template-columns: 1fr; }
+  .appraisal-actions { flex-direction: column-reverse; }
+  .appraisal-actions .btn { width: 100%; }
+}

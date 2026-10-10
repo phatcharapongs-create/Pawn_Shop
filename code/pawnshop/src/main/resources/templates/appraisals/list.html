@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/layout}">
+<head><title>ประวัติผลประเมินราคา</title><link rel="stylesheet" th:href="@{/css/appraisal.css}"></head>
+<body><div layout:fragment="content" class="appraisal-page appraisal-history-page">
+    <div class="page-head">
+        <div><span class="eyebrow">PAWNSHOP · APPRAISAL HISTORY</span><h1 class="page-title">ประวัติผลประเมินราคา</h1><p class="page-sub">รายการทรัพย์และวงเงินประเมินที่บันทึกไว้ในระบบ</p></div>
+        <div class="page-actions"><a class="btn btn-primary" th:href="@{/appraisals/new}">ประเมินทรัพย์ชิ้นใหม่</a></div>
+    </div>
+    <section class="card">
+        <div class="table-wrap">
+            <table class="table appraisal-history-table">
+                <thead><tr><th>วันที่ประเมิน</th><th>รหัสทรัพย์</th><th>ประเภท</th><th>รายละเอียดทรัพย์</th><th class="num">มูลค่าประเมิน</th><th class="num">วงเงินสูงสุด</th><th></th></tr></thead>
+                <tbody>
+                    <tr th:each="row : ${appraisals.content}">
+                        <td th:text="${#temporals.format(row.appraisedAt, 'dd/MM/yyyy HH:mm')}">10/10/2026 12:00</td>
+                        <td th:text="${row.pledgedItemId}">1</td>
+                        <td th:text="${row.itemType}">GOLD</td>
+                        <td><strong th:text="${row.description}">รายละเอียดทรัพย์</strong><small class="history-serial" th:if="${row.serialNumber != null and !row.serialNumber.isBlank()}" th:text="|Serial: ${row.serialNumber}|">Serial</small></td>
+                        <td class="num" th:text="|${#numbers.formatDecimal(row.appraisedValue, 1, 'COMMA', 2, 'POINT')} บาท|">0.00 บาท</td>
+                        <td class="num" th:text="|${#numbers.formatDecimal(row.maxLoanAmount, 1, 'COMMA', 2, 'POINT')} บาท|">0.00 บาท</td>
+                        <td><a class="btn btn-outline btn-small" th:href="@{/appraisals/{id}(id=${row.id})}">ดูผล</a></td>
+                    </tr>
+                    <tr th:if="${appraisals.empty}"><td colspan="7" class="empty">ยังไม่มีประวัติผลประเมิน</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <nav class="history-pagination" th:if="${appraisals.totalPages > 1}" aria-label="เปลี่ยนหน้าประวัติผลประเมิน">
+            <a class="btn btn-outline btn-small" th:if="${!appraisals.first}" th:href="@{/appraisals(page=${appraisals.number - 1})}">ก่อนหน้า</a>
+            <span th:text="|หน้า ${appraisals.number + 1} จาก ${appraisals.totalPages}|">หน้า 1 จาก 1</span>
+            <a class="btn btn-outline btn-small" th:if="${!appraisals.last}" th:href="@{/appraisals(page=${appraisals.number + 1})}">ถัดไป</a>
+        </nav>
+    </section>
+</div></body></html>

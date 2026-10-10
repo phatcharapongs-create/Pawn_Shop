@@ -1,0 +1,41 @@
+digraph StatePattern {
+  rankdir=TB;
+  graph [fontname="Loma", fontsize=18, label="Class Diagram — State Pattern (Slice C)", labelloc=t, pad=0.4, nodesep=0.35, ranksep=0.8, bgcolor=white];
+  node  [fontname="Loma", fontsize=11, shape=plain];
+  edge  [fontname="Loma", fontsize=10, color="#444444"];
+
+  Service [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" bgcolor="#EAF2FB" color="#2E5A88">
+    <tr><td><b>TicketOperationServiceImpl</b></td></tr><hr/>
+    <tr><td align="left">- stateFactory : TicketStateFactory</td></tr><hr/>
+    <tr><td align="left">+ renewInterest(...) : PawnTicket</td></tr>
+    <tr><td align="left">+ redeem(...) : PawnTicket</td></tr></table>>];
+
+  Factory [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" bgcolor="#EAF2FB" color="#2E5A88">
+    <tr><td><b>TicketStateFactory</b></td></tr><hr/>
+    <tr><td align="left">- registry : Map&lt;TicketStatus, TicketState&gt;</td></tr><hr/>
+    <tr><td align="left">+ TicketStateFactory(states : List&lt;TicketState&gt;)</td></tr>
+    <tr><td align="left">+ stateOf(status) : TicketState</td></tr></table>>];
+
+  Ticket [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" bgcolor="#F5F5F5" color="#666666">
+    <tr><td><b>PawnTicket</b> «entity»</td></tr><hr/>
+    <tr><td align="left">- status : TicketStatus</td></tr>
+    <tr><td align="left">- dueDate, graceEndDate</td></tr></table>>];
+
+  State [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" bgcolor="#FFF4E0" color="#C8862A">
+    <tr><td><i>«interface»</i></td></tr><tr><td><b>TicketState</b></td></tr><hr/>
+    <tr><td align="left">+ status() : TicketStatus</td></tr>
+    <tr><td align="left">+ canRenew() / canRedeem() / canForfeit() / canSell() : boolean</td></tr>
+    <tr><td align="left">+ nextAfterRenew() / nextAfterRedeem() / ... : TicketStatus</td></tr>
+    <tr><td align="left">+ displayName() : String</td></tr></table>>];
+
+  node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#C8862A", fontsize=11, margin="0.15,0.06"];
+  Active [label="ActiveState"]; Grace [label="GraceState"]; Redeemed [label="RedeemedState"];
+  Forfeited [label="ForfeitedState"]; Sold [label="SoldState"]; Seized [label="SeizedState"];
+
+  Service -> Factory [arrowhead=vee, label=" ใช้"];
+  Service -> State   [arrowhead=vee, style=dashed, label=" ถาม canXxx() / nextAfterXxx()"];
+  Service -> Ticket  [arrowhead=vee, style=dashed, label=" อ่าน/แก้ status"];
+  Factory -> State   [dir=both, arrowtail=odiamond, arrowhead=vee, headlabel="1..*", labeldistance=2.5, label=" registry"];
+  {Active Grace Redeemed Forfeited Sold Seized} -> State [arrowhead=onormal, style=dashed];
+  { rank=same; Factory; Ticket; }
+}

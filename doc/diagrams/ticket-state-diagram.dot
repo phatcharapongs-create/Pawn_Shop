@@ -1,0 +1,36 @@
+digraph TicketState {
+  rankdir=LR;
+  graph [fontname="Loma", fontsize=20, label="State Diagram — ตั๋วจำนำ (PawnTicket)", labelloc=t, pad=0.4, nodesep=0.7, ranksep=1.1, bgcolor=white];
+  node  [fontname="Loma", fontsize=14, shape=box, style="rounded,filled", fillcolor="#EAF2FB", color="#2E5A88", penwidth=1.6, margin="0.25,0.12"];
+  edge  [fontname="Loma", fontsize=11, color="#555555", fontcolor="#333333", arrowsize=0.8];
+
+  start [shape=circle, label="", width=0.28, fillcolor=black, color=black];
+  end1  [shape=doublecircle, label="", width=0.22, fillcolor=black, color=black];
+  end2  [shape=doublecircle, label="", width=0.22, fillcolor=black, color=black];
+
+  ACTIVE    [label="ACTIVE\nในกำหนด"];
+  GRACE     [label="GRACE\nผ่อนผัน", fillcolor="#FFF4E0", color="#C8862A"];
+  SEIZED    [label="SEIZED\nถูกอายัด", fillcolor="#FDE8E8", color="#B03A3A"];
+  REDEEMED  [label="REDEEMED\nไถ่ถอนแล้ว", fillcolor="#E6F4EA", color="#2E7D4F"];
+  FORFEITED [label="FORFEITED\nหลุดจำนำ", fillcolor="#FDE8E8", color="#B03A3A"];
+  SOLD      [label="SOLD\nจำหน่ายแล้ว", fillcolor="#EEEEEE", color="#666666"];
+
+  start  -> ACTIVE    [label="openTicket()\nรับจำนำ"];
+  ACTIVE -> ACTIVE    [label="renewInterest()\nต่อดอก"];
+  ACTIVE -> GRACE     [label="promoteOverdueToGrace()\n[เลยวันครบกำหนด]"];
+  GRACE  -> ACTIVE    [label="renewInterest()\nต่อดอก"];
+  ACTIVE -> REDEEMED  [label="redeem()\nไถ่ถอน"];
+  GRACE  -> REDEEMED  [label="redeem()\nไถ่ถอน"];
+  GRACE  -> FORFEITED [label="forfeitExpired()\n[พ้นช่วงผ่อนผัน]"];
+  FORFEITED -> SOLD   [label="recordSale()\nจำหน่ายทรัพย์"];
+
+  ACTIVE -> SEIZED    [label="seize()\nอายัด", color="#B03A3A", fontcolor="#B03A3A"];
+  GRACE  -> SEIZED    [label="seize()\nอายัด", color="#B03A3A", fontcolor="#B03A3A"];
+  SEIZED -> ACTIVE    [label="releaseSeizure()\n[ยังไม่เลยกำหนด]", style=dashed];
+  SEIZED -> GRACE     [label="releaseSeizure()\n[เลยกำหนดแล้ว]", style=dashed];
+
+  REDEEMED -> end1;
+  SOLD     -> end2;
+
+  { rank=same; REDEEMED; FORFEITED; }
+}

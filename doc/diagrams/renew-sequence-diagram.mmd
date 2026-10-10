@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    actor Staff as พนักงาน
+    participant WC as TicketWebController
+    participant OS as TicketOperationServiceImpl
+    participant SF as TicketStateFactory
+    participant ST as TicketState
+    participant IC as InterestCalculator
+    participant LS as LedgerService
+    participant TR as PawnTicketRepository
+    Staff->>WC: POST /pawn-tickets/{id}/renew
+    WC->>OS: renewInterest(id, today, employeeId)
+    OS->>TR: findById(id)
+    TR-->>OS: PawnTicket
+    OS->>SF: stateOf(ticket.status)
+    SF-->>OS: ActiveState / GraceState
+    OS->>ST: canRenew()
+    alt ทำไม่ได้ (REDEEMED, FORFEITED, SOLD, SEIZED)
+        ST-->>OS: false
+        OS-->>WC: throw InvalidTicketOperationException
+        WC-->>Staff: แสดงข้อความ error
+    else ทำได้
+        ST-->>OS: true
+        OS->>IC: accruedInterest(ticket, today)
+        IC-->>OS: ดอกเบี้ย (Money)
+        OS->>LS: recordEntry(INTEREST_PAYMENT, ...)
+        OS->>OS: เลื่อน dueDate และ graceEndDate ตามนโยบาย
+        OS->>ST: nextAfterRenew()
+        ST-->>OS: ACTIVE
+        OS->>TR: save(ticket)
+        OS-->>WC: PawnTicket
+        WC-->>Staff: redirect หน้าตั๋ว + ข้อความสำเร็จ
+    end
