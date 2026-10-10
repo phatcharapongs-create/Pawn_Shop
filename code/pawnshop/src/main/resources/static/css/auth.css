@@ -1,8 +1,0 @@
-.auth-card { max-width:36rem; margin:2rem auto; }
-.signup-card .card-body > .page-sub { margin:0 0 1.2rem; }
-.signup-divider { display:flex; align-items:center; gap:.75rem; margin:1.35rem 0 1rem; color:var(--gold-ink); font-weight:700; }
-.signup-divider::before,.signup-divider::after { content:""; height:1px; flex:1; background:var(--line); }
-.signup-actions { display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-top:1.5rem; }
-.signup-prompt { margin:1rem 0 0; color:var(--gray); text-align:center; }
-.signup-prompt a { color:var(--gold-ink); font-weight:700; }
-@media(max-width:520px) { .auth-card { margin:1rem auto; } .signup-actions { flex-direction:column-reverse; align-items:stretch; } }
