@@ -37,12 +37,16 @@ public class ReportServiceImpl implements ReportService {
 
             return DailyReportResponse.EntryDto.builder()
                     .time(entry.getCreatedAt() != null ? entry.getCreatedAt().toLocalTime().toString() : "")
-                    .ticketNumber(entry.getTicket() != null ? String.valueOf(entry.getTicket().getId()) : "-")
+                    .ticketNumber(entry.getTicket() != null ? entry.getTicket().getTicketNumber() : "-")
                     .entryType(entry.getEntryType() != null ? entry.getEntryType().name() : "")
+                    .interestFrom(entry.getInterestFrom())
+                    .interestTo(entry.getInterestTo())
                     .principalAmount(DailyReportResponse.MoneyDto.builder().amount(principal).build())
                     .interestAmount(DailyReportResponse.MoneyDto.builder().amount(interest).build())
                     .totalAmount(DailyReportResponse.MoneyDto.builder().amount(total).build())
-                    .handledBy(entry.getHandledBy() != null ? String.valueOf(entry.getHandledBy().getId()) : "-")
+                    .handledBy(entry.getHandledBy() != null
+                            ? entry.getHandledBy().getFirstName() + " " + entry.getHandledBy().getLastName() : "-")
+                    .note(entry.getNote())
                     .build();
         }).collect(Collectors.toList());
 
