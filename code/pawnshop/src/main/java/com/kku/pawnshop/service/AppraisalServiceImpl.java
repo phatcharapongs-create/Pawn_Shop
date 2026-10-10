@@ -3,16 +3,21 @@ package com.kku.pawnshop.service;
 import com.kku.pawnshop.domain.entity.Appraisal;
 import com.kku.pawnshop.domain.entity.PledgedItem;
 import com.kku.pawnshop.domain.enums.ItemType;
+import com.kku.pawnshop.dto.pledged.AppraisalDetailView;
+import com.kku.pawnshop.dto.pledged.AppraisalHistoryRow;
 import com.kku.pawnshop.exception.BusinessRuleViolationException;
 import com.kku.pawnshop.exception.ResourceNotFoundException;
 import com.kku.pawnshop.repository.AppraisalRepository;
 import com.kku.pawnshop.repository.EmployeeRepository;
 import com.kku.pawnshop.repository.PledgedItemRepository;
+import com.kku.pawnshop.mapper.PledgedItemMapper;
 import com.kku.pawnshop.service.appraisal.AppraisalStrategy;
 import com.kku.pawnshop.service.appraisal.AppraisalStrategyResolver;
 import com.kku.pawnshop.service.pricing.GoldPriceProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -24,15 +29,17 @@ public class AppraisalServiceImpl implements AppraisalService {
     private final EmployeeRepository employeeRepository;
     private final AppraisalStrategyResolver strategyResolver;
     private final GoldPriceProvider goldPriceProvider;
+    private final PledgedItemMapper mapper;
 
     public AppraisalServiceImpl(AppraisalRepository appraisalRepository, PledgedItemRepository pledgedItemRepository,
             EmployeeRepository employeeRepository, AppraisalStrategyResolver strategyResolver,
-            GoldPriceProvider goldPriceProvider) {
+            GoldPriceProvider goldPriceProvider, PledgedItemMapper mapper) {
         this.appraisalRepository = appraisalRepository;
         this.pledgedItemRepository = pledgedItemRepository;
         this.employeeRepository = employeeRepository;
         this.strategyResolver = strategyResolver;
         this.goldPriceProvider = goldPriceProvider;
+        this.mapper = mapper;
     }
 
     @Override
@@ -67,5 +74,29 @@ public class AppraisalServiceImpl implements AppraisalService {
     public Appraisal findByPledgedItemId(Long pledgedItemId) {
         return appraisalRepository.findByPledgedItemId(pledgedItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("ไม่พบผลประเมินของทรัพย์รหัส " + pledgedItemId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AppraisalHistoryRow> findHistory(Pageable pageable) {
+        return appraisalRepository.findAllByOrderByAppraisedAtDesc(pageable).map(appraisal -> {
+            PledgedItem item = appraisal.getPledgedItem();
+            return new AppraisalHistoryRow(appraisal.getId(), item.getId(), item.getItemType(), item.getDescription(),
+                    item.getSerialNumber(), appraisal.getAppraisedValue().getAmount(),
+                    appraisal.getMaxLoanAmount().getAmount(), appraisal.getAppraisedAt());
+        });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Appraisal findById(Long id) {
+        return appraisalRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ไม่พบผลประเมินรหัส " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public AppraisalDetailView findDetail(Long id) {
+        Appraisal appraisal = findById(id);
+        return new AppraisalDetailView(mapper.toResponse(appraisal.getPledgedItem()), mapper.toResponse(appraisal));
     }
 }

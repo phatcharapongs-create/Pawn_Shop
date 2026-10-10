@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>ราคาทองคำ</title>
+    <link rel="stylesheet" th:href="@{/css/ops.css}">
+</head>
+<body>
+<!--
+  หมายเหตุสำหรับ Controller (GET /gold-prices, POST /gold-prices): ต้องส่งเข้า Model
+    latest    : ราคาล่าสุด (null ได้ถ้ายังไม่มีข้อมูล) มี priceDate (LocalDate), pricePerGram (BigDecimal)
+    prices    : Page ของประวัติราคา เรียงวันที่ล่าสุดก่อน แต่ละแถวมี
+                priceDate (LocalDate), pricePerGram (BigDecimal), recordedByName (String, null ได้)
+    priceForm : ฟอร์มบันทึกราคา มี priceDate (ค่าเริ่มต้นวันนี้), pricePerGram, employeeId (ไม่บังคับ)
+  ข้อความหลังบันทึก ส่งผ่าน RedirectAttributes ชื่อ success / error (เหมือนหน้ารายการตั๋ว)
+-->
+<div layout:fragment="content">
+
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">GOLD PRICE</span>
+            <h1 class="page-title">ราคาทองคำรายวัน</h1>
+            <p class="page-sub">ใช้เป็นฐานในการประเมินราคาทรัพย์ประเภททองคำ</p>
+        </div>
+    </div>
+
+    <div class="alert alert-success" role="status" th:if="${success}">
+        <span class="alert-body" th:text="${success}">บันทึกราคาทองเรียบร้อย</span>
+        <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+    </div>
+    <div class="alert alert-error" role="alert" th:if="${error}">
+        <span class="alert-body" th:text="${error}">เกิดข้อผิดพลาด</span>
+        <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+    </div>
+
+    <div class="gold-top">
+
+        <!-- ราคาล่าสุด -->
+        <section class="price-now" aria-label="ราคาทองล่าสุด">
+            <p class="label">ราคาทองล่าสุดในระบบ</p>
+
+            <th:block th:if="${latest != null}">
+                <p class="value">
+                    <span th:text="${#numbers.formatDecimal(latest.pricePerGram, 1, 'COMMA', 2, 'POINT')}">2,500.00</span>
+                    <small>บาท / กรัม</small>
+                </p>
+                <p class="asof">
+                    ราคาของวันที่ <span th:text="${#temporals.format(latest.priceDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                </p>
+                <p class="stale" th:if="${latest.priceDate.isBefore(#temporals.createToday())}">
+                    ยังไม่ได้บันทึกราคาของวันนี้ ระบบจะใช้ราคาล่าสุดนี้ในการประเมิน
+                </p>
+            </th:block>
+
+            <th:block th:if="${latest == null}">
+                <p class="value">-</p>
+                <p class="stale">ยังไม่มีราคาทองในระบบ ต้องบันทึกก่อนจึงจะประเมินทองคำได้</p>
+            </th:block>
+        </section>
+
+        <!-- ฟอร์มบันทึกราคา -->
+        <section class="card price-form" aria-labelledby="price-form-heading">
+            <div class="card-head">
+                <h2 id="price-form-heading">บันทึกราคาทอง</h2>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/gold-prices}" th:object="${priceForm}" method="post">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="priceDate">วันที่ <span class="req">*</span></label>
+                            <input id="priceDate" type="date" class="control" th:field="*{priceDate}" required>
+                            <small class="field-error" th:if="${#fields.hasErrors('priceDate')}" th:errors="*{priceDate}"></small>
+                        </div>
+                        <div class="field">
+                            <label for="pricePerGram">ราคาต่อกรัม (บาท) <span class="req">*</span></label>
+                            <input id="pricePerGram" type="number" class="control" th:field="*{pricePerGram}"
+                                   step="0.01" min="0.01" placeholder="เช่น 2500.00" required>
+                            <small class="field-error" th:if="${#fields.hasErrors('pricePerGram')}" th:errors="*{pricePerGram}"></small>
+                        </div>
+                        <div class="field">
+                            <label for="employeeId">รหัสพนักงาน <span class="muted">(ไม่บังคับ)</span></label>
+                            <input id="employeeId" type="number" class="control" th:field="*{employeeId}">
+                            <small class="field-error" th:if="${#fields.hasErrors('employeeId')}" th:errors="*{employeeId}"></small>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <span class="field-hint">แต่ละวันบันทึกได้ 1 ราคา</span>
+                        <button type="submit" class="btn btn-primary">บันทึกราคา</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <h2 class="section-title" style="margin-bottom: .9rem;">ประวัติราคาทอง</h2>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>วันที่</th>
+                <th class="num">ราคาต่อกรัม (บาท)</th>
+                <th>บันทึกโดย</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${prices.content}">
+                <td class="nowrap" th:text="${#temporals.format(p.priceDate, 'dd/MM/yyyy')}">01/01/2026</td>
+                <td class="num cell-main" th:text="${#numbers.formatDecimal(p.pricePerGram, 1, 'COMMA', 2, 'POINT')}">2,500.00</td>
+                <td th:text="${p.recordedByName != null ? p.recordedByName : '-'}">-</td>
+            </tr>
+            <tr th:if="${prices.empty}">
+                <td colspan="3" class="empty">ยังไม่มีประวัติราคาทอง</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:if="${prices.totalPages > 1}" aria-label="เปลี่ยนหน้า">
+        <ul class="pagination">
+            <li th:classappend="${prices.first} ? 'disabled'">
+                <a th:href="@{/gold-prices(page=${prices.number - 1})}">ก่อนหน้า</a>
+            </li>
+            <li class="active">
+                <span th:text="|${prices.number + 1} / ${prices.totalPages}|">1 / 1</span>
+            </li>
+            <li th:classappend="${prices.last} ? 'disabled'">
+                <a th:href="@{/gold-prices(page=${prices.number + 1})}">ถัดไป</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+</body>
+</html>

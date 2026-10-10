@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>ทรัพย์หลุดจำนำ</title>
+    <link rel="stylesheet" th:href="@{/css/ops.css}">
+</head>
+<body>
+<!--
+  หมายเหตุสำหรับ Controller (GET /forfeited-items?status=&page=, POST /forfeited-items/{ticketId}/sell)
+  ต้องส่งเข้า Model
+    statusFilter : String  null = ทั้งหมด, "FORFEITED" = รอจำหน่าย, "SOLD" = จำหน่ายแล้ว
+    summary      : forfeitedCount (long), forfeitedPrincipal (BigDecimal), soldCount (long), soldTotal (BigDecimal)
+    items        : Page ของตั๋วที่สถานะ FORFEITED หรือ SOLD แต่ละแถวมี
+                   ticketId, ticketNumber, customerName, principal (BigDecimal), graceEndDate (LocalDate),
+                   status ("FORFEITED" หรือ "SOLD"), itemType (ชื่อ enum), itemDescription, storageSlot (null ได้),
+                   และเฉพาะที่ขายแล้ว: soldPrice (BigDecimal), soldDate (LocalDate), buyerName (null ได้)
+  ฟอร์มขายส่งค่าไป: soldPrice, buyerName, soldDate, employeeId (ตรงกับ SaleService.recordSale)
+  ข้อความหลังบันทึก ส่งผ่าน RedirectAttributes ชื่อ success / error
+-->
+<div layout:fragment="content">
+
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">FORFEITED ITEMS</span>
+            <h1 class="page-title">ทรัพย์หลุดจำนำ</h1>
+            <p class="page-sub">ทรัพย์ที่พ้นช่วงผ่อนผันแล้ว รอจำหน่ายหรือจำหน่ายไปแล้ว</p>
+        </div>
+        <form method="post" th:action="@{/forfeited-items/process-status}"
+              data-confirm-message="ตรวจสอบวันครบกำหนดและอัปเดตสถานะตั๋วทั้งหมดตามวันที่ปัจจุบัน?">
+            <button type="submit" class="btn btn-primary">ตรวจสอบและอัปเดตสถานะ</button>
+        </form>
+    </div>
+
+    <div class="alert alert-success" role="status" th:if="${success}">
+        <span class="alert-body" th:text="${success}">บันทึกการขายเรียบร้อย</span>
+        <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+    </div>
+    <div class="alert alert-error" role="alert" th:if="${error}">
+        <span class="alert-body" th:text="${error}">เกิดข้อผิดพลาด</span>
+        <button type="button" class="alert-close" data-dismiss="alert" aria-label="ปิด">&times;</button>
+    </div>
+    <div class="alert alert-info" role="note">
+        <span class="alert-body">กดตรวจสอบสถานะเพื่อย้ายตั๋วที่พ้นกำหนดเข้าสู่ช่วงผ่อนผัน และทำเครื่องหมายทรัพย์ที่พ้นช่วงผ่อนผันแล้วว่า “หลุดจำนำ” จากนั้นบันทึกการขายได้ในแถวรายการ</span>
+    </div>
+
+    <!-- สรุป -->
+    <dl class="stats">
+        <div>
+            <dt>รอจำหน่าย (ชิ้น)</dt>
+            <dd th:text="${summary.forfeitedCount}">0</dd>
+        </div>
+        <div>
+            <dt>เงินต้นของทรัพย์ที่รอจำหน่าย (บาท)</dt>
+            <dd th:text="${#numbers.formatDecimal(summary.forfeitedPrincipal, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
+        </div>
+        <div>
+            <dt>จำหน่ายแล้ว (ชิ้น)</dt>
+            <dd th:text="${summary.soldCount}">0</dd>
+        </div>
+        <div class="dark">
+            <dt>ยอดขายรวม (บาท)</dt>
+            <dd th:text="${#numbers.formatDecimal(summary.soldTotal, 1, 'COMMA', 2, 'POINT')}">0.00</dd>
+        </div>
+    </dl>
+
+    <!-- ตัวกรอง -->
+    <nav class="chips" aria-label="กรองตามสถานะ">
+        <a class="chip" th:href="@{/forfeited-items}" th:classappend="${statusFilter == null} ? 'active'">ทั้งหมด</a>
+        <a class="chip" th:href="@{/forfeited-items(status='FORFEITED')}" th:classappend="${statusFilter == 'FORFEITED'} ? 'active'">รอจำหน่าย</a>
+        <a class="chip" th:href="@{/forfeited-items(status='SOLD')}" th:classappend="${statusFilter == 'SOLD'} ? 'active'">จำหน่ายแล้ว</a>
+    </nav>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>เลขที่ตั๋ว</th>
+                <th>ทรัพย์</th>
+                <th>ลูกค้า</th>
+                <th class="num">เงินต้น (บาท)</th>
+                <th>พ้นผ่อนผันเมื่อ</th>
+                <th>สถานะ</th>
+                <th>การจำหน่าย</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="i : ${items.content}">
+                <td class="nowrap">
+                    <a class="link" th:href="@{/pawn-tickets/{id}(id=${i.ticketId})}" th:text="${i.ticketNumber}">PT000001</a>
+                </td>
+                <td>
+                    <span class="cell-main" th:text="${i.itemDescription}">สร้อยคอทองคำ 2 สลึง</span>
+                    <span class="cell-sub">
+                        <span th:switch="${i.itemType}">
+                            <span th:case="'GOLD'">ทองคำ</span>
+                            <span th:case="'ELECTRONICS'">เครื่องใช้ไฟฟ้า</span>
+                            <span th:case="'JEWELRY'">เครื่องประดับ</span>
+                            <span th:case="*" th:text="${i.itemType}">-</span>
+                        </span>
+                        <span th:if="${i.storageSlot != null}">· ช่องเก็บ <span th:text="${i.storageSlot}">A-01</span></span>
+                    </span>
+                </td>
+                <td th:text="${i.customerName}">-</td>
+                <td class="num" th:text="${#numbers.formatDecimal(i.principal, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="nowrap" th:text="${#temporals.format(i.graceEndDate, 'dd/MM/yyyy')}">01/01/2026</td>
+                <td>
+                    <span class="badge status-forfeited" th:if="${i.status == 'FORFEITED'}">รอจำหน่าย</span>
+                    <span class="badge status-sold" th:if="${i.status == 'SOLD'}">จำหน่ายแล้ว</span>
+                </td>
+                <td>
+                    <!-- ขายแล้ว: แสดงรายละเอียดการขาย -->
+                    <div th:if="${i.status == 'SOLD'}">
+                        <span class="cell-main" th:if="${i.soldPrice != null}"
+                              th:text="${#numbers.formatDecimal(i.soldPrice, 1, 'COMMA', 2, 'POINT')} + ' บาท'">0.00 บาท</span>
+                        <span class="cell-sub">
+                            <span th:if="${i.soldDate != null}" th:text="${#temporals.format(i.soldDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                            <span th:if="${i.buyerName != null}">· ผู้ซื้อ <span th:text="${i.buyerName}">-</span></span>
+                        </span>
+                    </div>
+
+                    <!-- รอจำหน่าย: กดเพื่อกางฟอร์มบันทึกการขาย -->
+                    <details class="sell" th:if="${i.status == 'FORFEITED'}">
+                        <summary class="btn btn-primary btn-sm">บันทึกการขาย</summary>
+                        <form class="sell-form" method="post"
+                              th:action="@{/forfeited-items/{id}/sell(id=${i.ticketId})}"
+                              data-confirm-message="ยืนยันการบันทึกการขายทรัพย์ชิ้นนี้?">
+                            <label th:for="${'soldPrice-' + i.ticketId}">ราคาขาย (บาท) <span class="req">*</span></label>
+                            <input th:id="${'soldPrice-' + i.ticketId}" type="number" name="soldPrice" class="control"
+                                   step="0.01" min="0.01" required>
+
+                            <label th:for="${'buyerName-' + i.ticketId}">ชื่อผู้ซื้อ</label>
+                            <input th:id="${'buyerName-' + i.ticketId}" type="text" name="buyerName" class="control" maxlength="200">
+
+                            <label th:for="${'soldDate-' + i.ticketId}">วันที่ขาย <span class="req">*</span></label>
+                            <input th:id="${'soldDate-' + i.ticketId}" type="date" name="soldDate" class="control"
+                                   th:value="${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}" required>
+
+                            <label th:for="${'employeeId-' + i.ticketId}">รหัสพนักงาน <span class="muted">(ไม่บังคับ)</span></label>
+                            <input th:id="${'employeeId-' + i.ticketId}" type="number" name="employeeId" class="control">
+
+                            <button type="submit" class="btn btn-dark btn-sm">ยืนยันการขาย</button>
+                        </form>
+                    </details>
+                </td>
+            </tr>
+            <tr th:if="${items.empty}">
+                <td colspan="7" class="empty">ไม่มีทรัพย์หลุดจำนำในรายการนี้</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:if="${items.totalPages > 1}" aria-label="เปลี่ยนหน้า">
+        <ul class="pagination">
+            <li th:classappend="${items.first} ? 'disabled'">
+                <a th:href="@{/forfeited-items(page=${items.number - 1}, status=${statusFilter})}">ก่อนหน้า</a>
+            </li>
+            <li class="active">
+                <span th:text="|${items.number + 1} / ${items.totalPages}|">1 / 1</span>
+            </li>
+            <li th:classappend="${items.last} ? 'disabled'">
+                <a th:href="@{/forfeited-items(page=${items.number + 1}, status=${statusFilter})}">ถัดไป</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+</body>
+</html>
