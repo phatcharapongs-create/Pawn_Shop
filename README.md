@@ -41,8 +41,7 @@
 | API Docs | springdoc-openapi (Swagger UI) |
 | Testing | JUnit 5 + Mockito + Spring Boot Test |
 | Container | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
-| Deployment | _(รอระบุ)_ |
+| Deployment | Render (Docker) + PostgreSQL บน cloud |
  
 ---
  
