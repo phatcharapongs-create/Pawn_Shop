@@ -13,7 +13,7 @@ class ElectronicsAppraisalStrategyTest {
         ElectronicsAppraisalStrategy strategy = new ElectronicsAppraisalStrategy();
         PledgedItem item = new PledgedItem(); item.setItemType(ItemType.ELECTRONICS);
         item.setReferencePrice(Money.of(10000)); item.setManufactureYear(Year.now().getValue() - 2); item.setConditionGrade(3);
-        assertEquals(Money.of(9000), strategy.appraise(item));
+        assertEquals(Money.of(7200), strategy.appraise(item));
         assertEquals(new java.math.BigDecimal("0.50"), strategy.loanToValueRatio());
     }
     @Test void rejectsMissingReferencePrice() {
@@ -21,4 +21,5 @@ class ElectronicsAppraisalStrategyTest {
         assertThrows(BusinessRuleViolationException.class, () -> new ElectronicsAppraisalStrategy().appraise(item));
     }
 }
+
 

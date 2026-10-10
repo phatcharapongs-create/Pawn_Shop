@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ประเมินทรัพย์ | โรงรับจำนำ มหาวิทยาลัยขอนแก่น</title>
+    <link rel="stylesheet" th:href="@{/css/pawnshop.css}" href="../../static/css/pawnshop.css">
+    <link rel="stylesheet" th:href="@{/css/appraisal.css}" href="../../static/css/appraisal.css">
+</head>
+<body>
+<header class="site-header">
+    <h1>โรงรับจำนำ มหาวิทยาลัยขอนแก่น</h1>
+    <p>ระบบบริหารจัดการตั๋วจำนำ</p>
+</header>
+<main class="page appraisal-page">
+    <p class="appraisal-kicker">PAWNSHOP · APPRAISAL</p>
+    <h2 class="report-title">ลงทะเบียนและประเมินทรัพย์</h2>
+    <p class="report-meta">กรอกรายละเอียดทรัพย์เพื่อคำนวณมูลค่าประเมินและวงเงินจำนำสูงสุด</p>
+
+    <div class="appraisal-notice" role="note">
+        ราคาทองอ้างอิงจากราคาล่าสุดในระบบ ส่วนเครื่องใช้ไฟฟ้าและเครื่องประดับใช้ราคาอ้างอิงที่กรอก
+    </div>
+
+    <form class="appraisal-form" th:action="@{/appraisals}" th:object="${item}" method="post">
+        <section class="appraisal-section" aria-labelledby="item-info-heading">
+            <h3 id="item-info-heading" class="section-title">ข้อมูลทรัพย์</h3>
+            <div class="appraisal-fields">
+                <div class="form-field">
+                    <label for="itemType">ประเภททรัพย์ <span class="required-mark">*</span></label>
+                    <select id="itemType" th:field="*{itemType}" required>
+                        <option value="">เลือกประเภททรัพย์</option>
+                        <option th:each="type : ${itemTypes}" th:value="${type}" th:text="${type}">GOLD</option>
+                    </select>
+                    <small class="field-error" th:if="${#fields.hasErrors('itemType')}" th:errors="*{itemType}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="description">รายละเอียดทรัพย์ <span class="required-mark">*</span></label>
+                    <input id="description" type="text" th:field="*{description}" maxlength="300" placeholder="เช่น สร้อยคอทองคำ 2 สลึง" required>
+                    <small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="serialNumber">เลขประจำทรัพย์ / Serial number</label>
+                    <input id="serialNumber" type="text" th:field="*{serialNumber}" maxlength="100" placeholder="ถ้ามี">
+                    <small class="field-error" th:if="${#fields.hasErrors('serialNumber')}" th:errors="*{serialNumber}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="conditionGrade">เกรดสภาพ (1–5)</label>
+                    <select id="conditionGrade" th:field="*{conditionGrade}">
+                        <option value="">ใช้ค่าเริ่มต้น (3)</option>
+                        <option value="1">1 — ชำรุดมาก</option>
+                        <option value="2">2 — สภาพค่อนข้างเก่า</option>
+                        <option value="3">3 — สภาพปกติ</option>
+                        <option value="4">4 — สภาพดี</option>
+                        <option value="5">5 — สภาพดีมาก</option>
+                    </select>
+                    <small class="field-error" th:if="${#fields.hasErrors('conditionGrade')}" th:errors="*{conditionGrade}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="storageSlot">ตำแหน่งจัดเก็บ</label>
+                    <input id="storageSlot" type="text" th:field="*{storageSlot}" maxlength="30" placeholder="เช่น A-01">
+                    <small class="field-error" th:if="${#fields.hasErrors('storageSlot')}" th:errors="*{storageSlot}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="photoUrl">ลิงก์รูปทรัพย์</label>
+                    <input id="photoUrl" type="url" th:field="*{photoUrl}" maxlength="300" placeholder="https://...">
+                    <small class="field-error" th:if="${#fields.hasErrors('photoUrl')}" th:errors="*{photoUrl}"></small>
+                </div>
+            </div>
+        </section>
+
+        <section class="appraisal-section" aria-labelledby="pricing-heading">
+            <h3 id="pricing-heading" class="section-title">ข้อมูลสำหรับคำนวณราคา</h3>
+            <p class="section-help">กรอกเฉพาะข้อมูลที่เกี่ยวข้องกับประเภททรัพย์</p>
+            <div class="appraisal-fields">
+                <div class="form-field">
+                    <label for="weightGram">น้ำหนักทอง (กรัม)</label>
+                    <input id="weightGram" type="number" step="0.001" min="0.001" th:field="*{weightGram}" placeholder="เช่น 7.622">
+                    <small class="field-error" th:if="${#fields.hasErrors('weightGram')}" th:errors="*{weightGram}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="purityPercent">ความบริสุทธิ์ทอง (%)</label>
+                    <input id="purityPercent" type="number" step="0.01" min="0.01" max="100" th:field="*{purityPercent}" placeholder="เช่น 96.50">
+                    <small class="field-error" th:if="${#fields.hasErrors('purityPercent')}" th:errors="*{purityPercent}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="manufactureYear">ปีผลิต (เครื่องใช้ไฟฟ้า)</label>
+                    <input id="manufactureYear" type="number" min="1900" th:field="*{manufactureYear}" placeholder="เช่น 2022">
+                    <small class="field-error" th:if="${#fields.hasErrors('manufactureYear')}" th:errors="*{manufactureYear}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="referencePrice">ราคาอ้างอิงรุ่น (บาท)</label>
+                    <input id="referencePrice" type="number" step="0.01" min="0.01" th:field="*{referencePrice}" placeholder="เช่น 10000.00">
+                    <small class="field-hint">ใช้กับเครื่องใช้ไฟฟ้าและนาฬิกา/เครื่องประดับ</small>
+                    <small class="field-error" th:if="${#fields.hasErrors('referencePrice')}" th:errors="*{referencePrice}"></small>
+                </div>
+                <div class="form-field">
+                    <label for="appraiserId">รหัสพนักงานผู้ประเมิน</label>
+                    <input id="appraiserId" type="number" min="1" th:field="*{appraiserId}" placeholder="ไม่บังคับ">
+                    <small class="field-error" th:if="${#fields.hasErrors('appraiserId')}" th:errors="*{appraiserId}"></small>
+                </div>
+            </div>
+        </section>
+
+        <div class="appraisal-actions">
+            <a class="btn secondary" th:href="@{/pawn-tickets}">ยกเลิก</a>
+            <button class="btn" type="submit">บันทึกและประเมินราคา</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>
+
+

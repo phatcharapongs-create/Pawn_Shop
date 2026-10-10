@@ -7,14 +7,11 @@ import com.kku.pawnshop.exception.BusinessRuleViolationException;
 import com.kku.pawnshop.service.pricing.GoldPriceProvider;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class GoldAppraisalStrategyTest {
     @Test void calculatesValueFromWeightPriceAndPurity() {
-        GoldPriceProvider prices = mock(GoldPriceProvider.class);
-        when(prices.pricePerGram(any(LocalDate.class))).thenReturn(Money.of(2500));
+        GoldPriceProvider prices = date -> Money.of(2500);
         GoldAppraisalStrategy strategy = new GoldAppraisalStrategy(prices);
         PledgedItem item = new PledgedItem(); item.setItemType(ItemType.GOLD);
         item.setWeightGram(new BigDecimal("10")); item.setPurityPercent(new BigDecimal("96.5"));
@@ -27,4 +24,3 @@ class GoldAppraisalStrategyTest {
         assertThrows(BusinessRuleViolationException.class, () -> strategy.appraise(item));
     }
 }
-
